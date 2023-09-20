@@ -3,3 +3,4 @@
 model-registry
 metadata.sqlite.db
 vendor
+.sentinel

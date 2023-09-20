@@ -6,17 +6,118 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/opendatahub-io/model-registry/internal/model/graph"
 )
 
 // Type is the resolver for the type field.
-func (r *artifactResolver) Type(ctx context.Context, obj *graph.Artifact, filter *graph.InstanceFilter) (*graph.ArtifactType, error) {
+func (r *artifactResolver) Type(ctx context.Context, obj *graph.Artifact) (*graph.ArtifactType, error) {
 	id := "1"
-	return &graph.ArtifactType{ID: &id, Name: "TestType"}, nil
+	return &graph.ArtifactType{ID: id, Name: "TestType"}, nil
+}
+
+// Attributions is the resolver for the attributions field.
+func (r *artifactResolver) Attributions(ctx context.Context, obj *graph.Artifact) ([]*graph.Attribution, error) {
+	panic(fmt.Errorf("not implemented: Attributions - attributions"))
+}
+
+// Events is the resolver for the events field.
+func (r *artifactResolver) Events(ctx context.Context, obj *graph.Artifact) ([]*graph.Event, error) {
+	panic(fmt.Errorf("not implemented: Events - events"))
+}
+
+// Context is the resolver for the context field.
+func (r *associationResolver) Context(ctx context.Context, obj *graph.Association) (graph.ContextInterface, error) {
+	panic(fmt.Errorf("not implemented: Context - context"))
+}
+
+// Execution is the resolver for the execution field.
+func (r *associationResolver) Execution(ctx context.Context, obj *graph.Association) (graph.ExecutionInterface, error) {
+	panic(fmt.Errorf("not implemented: Execution - execution"))
+}
+
+// Context is the resolver for the context field.
+func (r *attributionResolver) Context(ctx context.Context, obj *graph.Attribution) (graph.ContextInterface, error) {
+	panic(fmt.Errorf("not implemented: Context - context"))
+}
+
+// Artifact is the resolver for the artifact field.
+func (r *attributionResolver) Artifact(ctx context.Context, obj *graph.Attribution) (graph.ArtifactInterface, error) {
+	panic(fmt.Errorf("not implemented: Artifact - artifact"))
+}
+
+// Type is the resolver for the type field.
+func (r *contextResolver) Type(ctx context.Context, obj *graph.Context) (*graph.ContextType, error) {
+	panic(fmt.Errorf("not implemented: Type - type"))
+}
+
+// Parents is the resolver for the parents field.
+func (r *contextResolver) Parents(ctx context.Context, obj *graph.Context) ([]graph.ContextInterface, error) {
+	panic(fmt.Errorf("not implemented: Parents - parents"))
+}
+
+// Children is the resolver for the children field.
+func (r *contextResolver) Children(ctx context.Context, obj *graph.Context) ([]graph.ContextInterface, error) {
+	panic(fmt.Errorf("not implemented: Children - children"))
+}
+
+// Attributions is the resolver for the attributions field.
+func (r *contextResolver) Attributions(ctx context.Context, obj *graph.Context) ([]*graph.Attribution, error) {
+	panic(fmt.Errorf("not implemented: Attributions - attributions"))
+}
+
+// Associations is the resolver for the associations field.
+func (r *contextResolver) Associations(ctx context.Context, obj *graph.Context) ([]*graph.Association, error) {
+	panic(fmt.Errorf("not implemented: Associations - associations"))
+}
+
+// Artifact is the resolver for the artifact field.
+func (r *eventResolver) Artifact(ctx context.Context, obj *graph.Event) (graph.ArtifactInterface, error) {
+	panic(fmt.Errorf("not implemented: Artifact - artifact"))
+}
+
+// Execution is the resolver for the execution field.
+func (r *eventResolver) Execution(ctx context.Context, obj *graph.Event) (graph.ExecutionInterface, error) {
+	panic(fmt.Errorf("not implemented: Execution - execution"))
+}
+
+// Type is the resolver for the type field.
+func (r *executionResolver) Type(ctx context.Context, obj *graph.Execution) (*graph.ExecutionType, error) {
+	panic(fmt.Errorf("not implemented: Type - type"))
+}
+
+// Associations is the resolver for the associations field.
+func (r *executionResolver) Associations(ctx context.Context, obj *graph.Execution) ([]*graph.InstanceProperty, error) {
+	panic(fmt.Errorf("not implemented: Associations - associations"))
+}
+
+// Events is the resolver for the events field.
+func (r *executionResolver) Events(ctx context.Context, obj *graph.Execution) ([]*graph.InstanceProperty, error) {
+	panic(fmt.Errorf("not implemented: Events - events"))
 }
 
 // Artifact returns ArtifactResolver implementation.
 func (r *Resolver) Artifact() ArtifactResolver { return &artifactResolver{r} }
 
+// Association returns AssociationResolver implementation.
+func (r *Resolver) Association() AssociationResolver { return &associationResolver{r} }
+
+// Attribution returns AttributionResolver implementation.
+func (r *Resolver) Attribution() AttributionResolver { return &attributionResolver{r} }
+
+// Context returns ContextResolver implementation.
+func (r *Resolver) Context() ContextResolver { return &contextResolver{r} }
+
+// Event returns EventResolver implementation.
+func (r *Resolver) Event() EventResolver { return &eventResolver{r} }
+
+// Execution returns ExecutionResolver implementation.
+func (r *Resolver) Execution() ExecutionResolver { return &executionResolver{r} }
+
 type artifactResolver struct{ *Resolver }
+type associationResolver struct{ *Resolver }
+type attributionResolver struct{ *Resolver }
+type contextResolver struct{ *Resolver }
+type eventResolver struct{ *Resolver }
+type executionResolver struct{ *Resolver }

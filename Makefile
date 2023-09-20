@@ -7,6 +7,9 @@ PROJECT_BIN := $(PROJECT_PATH)/bin
 PATH := $(PROJECT_BIN):$(PATH)
 model-registry: build
 
+# graphql mapper tool
+include tools/gqlmapper/gqlmapper.mk
+
 internal/ml_metadata/proto/%.pb.go: api/grpc/ml_metadata/proto/%.proto
 	protoc -I./api/grpc --go_out=./internal --go_opt=paths=source_relative \
 		--go-grpc_out=./internal --go-grpc_opt=paths=source_relative $<
@@ -64,8 +67,7 @@ build: gen vet lint
 	go build
 
 .PHONY: gen
-gen: deps gen/grpc gen/graph gen/converter
-	go generate ./...
+gen: deps gen/gqlmapper gen/grpc gen/graph gen/converter
 
 .PHONY: lint
 lint: gen

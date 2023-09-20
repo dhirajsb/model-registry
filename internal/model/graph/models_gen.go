@@ -2,96 +2,163 @@
 
 package graph
 
-type ArtifactTypeInterface interface {
-	IsType()
-	IsArtifactTypeInterface()
-	GetID() *string
-	GetName() string
-	GetVersion() string
-	GetTypeKind() int
-	GetDescription() string
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
+// Generic Artifact Interface implemented by all Artifact instances
+type ArtifactInterface interface {
+	IsArtifactInterface()
+	GetID() string
+	GetTypeID() string
+	GetURI() *string
+	GetState() *ArtifactState
+	GetName() *string
 	GetExternalID() *string
-	GetProperties() []*TypeProperty
+	GetCreateTimeSinceEpoch() int64
+	GetLastUpdateTimeSinceEpoch() int64
+	GetType() *ArtifactType
+	GetProperties() []*InstanceProperty
+	GetAttributions() []*Attribution
+	GetEvents() []*Event
 }
 
-type ContextTypeInterface interface {
-	IsType()
-	IsContextTypeInterface()
-	GetID() *string
+// Generic Context interface implemented by all Context instances
+type ContextInterface interface {
+	IsContextInterface()
+	GetID() string
+	GetTypeID() string
 	GetName() string
-	GetVersion() string
-	GetTypeKind() int
-	GetDescription() string
 	GetExternalID() *string
-	GetProperties() []*TypeProperty
+	GetCreateTimeSinceEpoch() int64
+	GetLastUpdateTimeSinceEpoch() int64
+	GetType() *ContextType
+	GetProperties() []*InstanceProperty
+	GetParents() []ContextInterface
+	GetChildren() []ContextInterface
+	GetAttributions() []*Attribution
+	GetAssociations() []*Association
 }
 
-type ExecutionTypeInterface interface {
-	IsType()
-	IsExecutionTypeInterface()
-	GetID() *string
-	GetName() string
-	GetVersion() string
-	GetTypeKind() int
-	GetDescription() string
-	GetExternalID() *string
-	GetInputType() string
-	GetOutputType() string
-	GetProperties() []*TypeProperty
+type EventStep interface {
+	IsEventStep()
 }
 
+// Generic Execution interface implemented by all Execution instances
+type ExecutionInterface interface {
+	IsExecutionInterface()
+	GetID() string
+	GetTypeID() string
+	GetLastKnownState() *ExecutionState
+	GetName() *string
+	GetExternalID() *string
+	GetCreateTimeSinceEpoch() int64
+	GetLastUpdateTimeSinceEpoch() int64
+	GetType() *ExecutionType
+	GetProperties() []*InstanceProperty
+	GetAssociations() []*Association
+	GetEvents() []*Event
+}
+
+// StructValueType is map entry type in StructValue
+type StructValueType interface {
+	IsStructValueType()
+}
+
+// Generic Type interface for all metadata types
 type Type interface {
 	IsType()
-	GetID() *string
+	GetID() string
 	GetName() string
-	GetVersion() string
-	GetTypeKind() int
-	GetDescription() string
+	GetVersion() *string
+	GetTypeKind() TypeKind
+	GetDescription() *string
 	GetExternalID() *string
 	GetProperties() []*TypeProperty
 }
 
+// Property values
 type Value interface {
 	IsValue()
 }
 
+// Generic Artifact instance
 type Artifact struct {
-	ID                       *string             `json:"id,omitempty"`
+	ID                       string              `json:"id"`
 	TypeID                   string              `json:"typeId"`
-	URI                      string              `json:"uri"`
-	State                    int                 `json:"state"`
-	Name                     string              `json:"name"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
 	ExternalID               *string             `json:"externalId,omitempty"`
-	CreateTimeSinceEpoch     int                 `json:"createTimeSinceEpoch"`
-	LastUpdateTimeSinceEpoch int                 `json:"lastUpdateTimeSinceEpoch"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
 	Type                     *ArtifactType       `json:"type"`
-	Properties               []*ArtifactProperty `json:"properties,omitempty"`
+	Properties               []*InstanceProperty `json:"properties,omitempty"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-type ArtifactProperty struct {
-	ArtifactID       *string `json:"artifactId,omitempty"`
-	Name             *string `json:"name,omitempty"`
-	IsCustomProperty bool    `json:"isCustomProperty"`
-	PropertyValue    Value   `json:"propertyValue"`
+func (Artifact) IsArtifactInterface()                    {}
+func (this Artifact) GetID() string                      { return this.ID }
+func (this Artifact) GetTypeID() string                  { return this.TypeID }
+func (this Artifact) GetURI() *string                    { return this.URI }
+func (this Artifact) GetState() *ArtifactState           { return this.State }
+func (this Artifact) GetName() *string                   { return this.Name }
+func (this Artifact) GetExternalID() *string             { return this.ExternalID }
+func (this Artifact) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this Artifact) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this Artifact) GetType() *ArtifactType             { return this.Type }
+func (this Artifact) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this Artifact) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this Artifact) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
 }
 
+// ArtifactType
 type ArtifactType struct {
-	ID          *string         `json:"id,omitempty"`
+	ID          string          `json:"id"`
 	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
+	Version     *string         `json:"version,omitempty"`
+	TypeKind    TypeKind        `json:"typeKind"`
+	Description *string         `json:"description,omitempty"`
 	ExternalID  *string         `json:"externalId,omitempty"`
 	Properties  []*TypeProperty `json:"properties,omitempty"`
 }
 
-func (ArtifactType) IsArtifactTypeInterface()    {}
-func (this ArtifactType) GetID() *string         { return this.ID }
-func (this ArtifactType) GetName() string        { return this.Name }
-func (this ArtifactType) GetVersion() string     { return this.Version }
-func (this ArtifactType) GetTypeKind() int       { return this.TypeKind }
-func (this ArtifactType) GetDescription() string { return this.Description }
-func (this ArtifactType) GetExternalID() *string { return this.ExternalID }
+func (ArtifactType) IsType()                      {}
+func (this ArtifactType) GetID() string           { return this.ID }
+func (this ArtifactType) GetName() string         { return this.Name }
+func (this ArtifactType) GetVersion() *string     { return this.Version }
+func (this ArtifactType) GetTypeKind() TypeKind   { return this.TypeKind }
+func (this ArtifactType) GetDescription() *string { return this.Description }
+func (this ArtifactType) GetExternalID() *string  { return this.ExternalID }
 func (this ArtifactType) GetProperties() []*TypeProperty {
 	if this.Properties == nil {
 		return nil
@@ -103,7 +170,31 @@ func (this ArtifactType) GetProperties() []*TypeProperty {
 	return interfaceSlice
 }
 
-func (ArtifactType) IsType() {}
+// ArtifactType input
+type ArtifactTypeInput struct {
+	Name        string               `json:"name"`
+	Version     *string              `json:"version,omitempty"`
+	TypeKind    TypeKind             `json:"typeKind"`
+	Description *string              `json:"description,omitempty"`
+	ExternalID  *string              `json:"externalId,omitempty"`
+	Properties  []*TypePropertyInput `json:"properties,omitempty"`
+}
+
+type Association struct {
+	ID          string             `json:"id"`
+	ContextID   string             `json:"contextId"`
+	ExecutionID string             `json:"executionId"`
+	Context     ContextInterface   `json:"context"`
+	Execution   ExecutionInterface `json:"execution"`
+}
+
+type Attribution struct {
+	ID         string            `json:"id"`
+	ContextID  string            `json:"contextId"`
+	ArtifactID string            `json:"artifactId"`
+	Context    ContextInterface  `json:"context"`
+	Artifact   ArtifactInterface `json:"artifact"`
+}
 
 type BoolValue struct {
 	Value bool `json:"value"`
@@ -111,45 +202,101 @@ type BoolValue struct {
 
 func (BoolValue) IsValue() {}
 
+func (BoolValue) IsStructValueType() {}
+
+// Generic Context instance
 type Context struct {
-	ID                       *string            `json:"id,omitempty"`
-	TypeID                   string             `json:"typeId"`
-	Name                     string             `json:"name"`
-	ExternalID               *string            `json:"externalId,omitempty"`
-	CreateTimeSinceEpoch     int                `json:"createTimeSinceEpoch"`
-	LastUpdateTimeSinceEpoch int                `json:"lastUpdateTimeSinceEpoch"`
-	Type                     *ContextType       `json:"type"`
-	Parent                   *Context           `json:"parent,omitempty"`
-	Children                 []*Context         `json:"children,omitempty"`
-	Attributions             []*Artifact        `json:"attributions,omitempty"`
-	Associations             []*Execution       `json:"associations,omitempty"`
-	Properties               []*ContextProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	Name                     string              `json:"name"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ContextType        `json:"type"`
+	Properties               []*InstanceProperty `json:"properties,omitempty"`
+	Parents                  []ContextInterface  `json:"parents,omitempty"`
+	Children                 []ContextInterface  `json:"children,omitempty"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Associations             []*Association      `json:"associations,omitempty"`
 }
 
-type ContextProperty struct {
-	ContextID        *string `json:"contextId,omitempty"`
-	Name             string  `json:"name"`
-	IsCustomProperty int     `json:"isCustomProperty"`
-	PropertyValue    Value   `json:"propertyValue"`
+func (Context) IsContextInterface()                     {}
+func (this Context) GetID() string                      { return this.ID }
+func (this Context) GetTypeID() string                  { return this.TypeID }
+func (this Context) GetName() string                    { return this.Name }
+func (this Context) GetExternalID() *string             { return this.ExternalID }
+func (this Context) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this Context) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this Context) GetType() *ContextType              { return this.Type }
+func (this Context) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this Context) GetParents() []ContextInterface {
+	if this.Parents == nil {
+		return nil
+	}
+	interfaceSlice := make([]ContextInterface, 0, len(this.Parents))
+	for _, concrete := range this.Parents {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this Context) GetChildren() []ContextInterface {
+	if this.Children == nil {
+		return nil
+	}
+	interfaceSlice := make([]ContextInterface, 0, len(this.Children))
+	for _, concrete := range this.Children {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this Context) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this Context) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
 }
 
+// ContextType
 type ContextType struct {
-	ID          *string         `json:"id,omitempty"`
+	ID          string          `json:"id"`
 	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
+	Version     *string         `json:"version,omitempty"`
+	TypeKind    TypeKind        `json:"typeKind"`
+	Description *string         `json:"description,omitempty"`
 	ExternalID  *string         `json:"externalId,omitempty"`
 	Properties  []*TypeProperty `json:"properties,omitempty"`
 }
 
-func (ContextType) IsContextTypeInterface()     {}
-func (this ContextType) GetID() *string         { return this.ID }
-func (this ContextType) GetName() string        { return this.Name }
-func (this ContextType) GetVersion() string     { return this.Version }
-func (this ContextType) GetTypeKind() int       { return this.TypeKind }
-func (this ContextType) GetDescription() string { return this.Description }
-func (this ContextType) GetExternalID() *string { return this.ExternalID }
+func (ContextType) IsType()                      {}
+func (this ContextType) GetID() string           { return this.ID }
+func (this ContextType) GetName() string         { return this.Name }
+func (this ContextType) GetVersion() *string     { return this.Version }
+func (this ContextType) GetTypeKind() TypeKind   { return this.TypeKind }
+func (this ContextType) GetDescription() *string { return this.Description }
+func (this ContextType) GetExternalID() *string  { return this.ExternalID }
 func (this ContextType) GetProperties() []*TypeProperty {
 	if this.Properties == nil {
 		return nil
@@ -161,71 +308,73 @@ func (this ContextType) GetProperties() []*TypeProperty {
 	return interfaceSlice
 }
 
-func (ContextType) IsType() {}
-
 type DoubleValue struct {
 	Value float64 `json:"value"`
 }
 
 func (DoubleValue) IsValue() {}
 
+func (DoubleValue) IsStructValueType() {}
+
+// Event instance
 type Event struct {
-	ID                     *string    `json:"id,omitempty"`
-	ArtifactID             string     `json:"artifactId"`
-	ExecutionID            string     `json:"executionId"`
-	Type                   int        `json:"type"`
-	Artifact               *Artifact  `json:"artifact,omitempty"`
-	Execution              *Execution `json:"execution,omitempty"`
-	MillisecondsSinceEpoch int        `json:"millisecondsSinceEpoch"`
+	ID                     string             `json:"id"`
+	ArtifactID             string             `json:"artifactId"`
+	ExecutionID            string             `json:"executionId"`
+	Type                   EventType          `json:"type"`
+	Path                   []EventStep        `json:"path"`
+	MillisecondsSinceEpoch int64              `json:"millisecondsSinceEpoch"`
+	Artifact               ArtifactInterface  `json:"artifact,omitempty"`
+	Execution              ExecutionInterface `json:"execution,omitempty"`
 }
 
-type EventPath struct {
-	EventID     string `json:"eventId"`
-	IsIndexStep int    `json:"isIndexStep"`
-	StepIndex   int    `json:"stepIndex"`
-	StepKey     string `json:"stepKey"`
+type EventStepIndex struct {
+	Index int `json:"index"`
 }
 
+func (EventStepIndex) IsEventStep() {}
+
+type EventStepKey struct {
+	Key string `json:"key"`
+}
+
+func (EventStepKey) IsEventStep() {}
+
+// Generic Execution instance
 type Execution struct {
-	ID                       *string              `json:"id,omitempty"`
-	TypeID                   string               `json:"typeId"`
-	LastKnownState           int                  `json:"lastKnownState"`
-	Name                     string               `json:"name"`
-	ExternalID               *string              `json:"externalId,omitempty"`
-	CreateTimeSinceEpoch     int                  `json:"createTimeSinceEpoch"`
-	LastUpdateTimeSinceEpoch int                  `json:"lastUpdateTimeSinceEpoch"`
-	Type                     *ExecutionType       `json:"type"`
-	Properties               []*ExecutionProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*InstanceProperty `json:"associations,omitempty"`
+	Events                   []*InstanceProperty `json:"events,omitempty"`
 }
 
-type ExecutionProperty struct {
-	ExecutionID      *string `json:"executionId,omitempty"`
-	Name             string  `json:"name"`
-	IsCustomProperty int     `json:"isCustomProperty"`
-	PropertyValue    Value   `json:"propertyValue"`
-}
-
+// ExecutionType
 type ExecutionType struct {
-	ID          *string         `json:"id,omitempty"`
+	ID          string          `json:"id"`
 	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
+	Version     *string         `json:"version,omitempty"`
+	TypeKind    TypeKind        `json:"typeKind"`
+	Description *string         `json:"description,omitempty"`
 	ExternalID  *string         `json:"externalId,omitempty"`
-	InputType   string          `json:"inputType"`
-	OutputType  string          `json:"outputType"`
+	InputType   *string         `json:"inputType,omitempty"`
+	OutputType  *string         `json:"outputType,omitempty"`
 	Properties  []*TypeProperty `json:"properties,omitempty"`
 }
 
-func (ExecutionType) IsExecutionTypeInterface()   {}
-func (this ExecutionType) GetID() *string         { return this.ID }
-func (this ExecutionType) GetName() string        { return this.Name }
-func (this ExecutionType) GetVersion() string     { return this.Version }
-func (this ExecutionType) GetTypeKind() int       { return this.TypeKind }
-func (this ExecutionType) GetDescription() string { return this.Description }
-func (this ExecutionType) GetExternalID() *string { return this.ExternalID }
-func (this ExecutionType) GetInputType() string   { return this.InputType }
-func (this ExecutionType) GetOutputType() string  { return this.OutputType }
+func (ExecutionType) IsType()                      {}
+func (this ExecutionType) GetID() string           { return this.ID }
+func (this ExecutionType) GetName() string         { return this.Name }
+func (this ExecutionType) GetVersion() *string     { return this.Version }
+func (this ExecutionType) GetTypeKind() TypeKind   { return this.TypeKind }
+func (this ExecutionType) GetDescription() *string { return this.Description }
+func (this ExecutionType) GetExternalID() *string  { return this.ExternalID }
 func (this ExecutionType) GetProperties() []*TypeProperty {
 	if this.Properties == nil {
 		return nil
@@ -237,8 +386,6 @@ func (this ExecutionType) GetProperties() []*TypeProperty {
 	return interfaceSlice
 }
 
-func (ExecutionType) IsType() {}
-
 type InstanceFilter struct {
 	Ids         []string `json:"ids,omitempty"`
 	TypeIds     []string `json:"typeIds,omitempty"`
@@ -246,307 +393,1948 @@ type InstanceFilter struct {
 	ExternalIds []string `json:"externalIds,omitempty"`
 }
 
+// Instance property
+type InstanceProperty struct {
+	Name             string `json:"name"`
+	IsCustomProperty bool   `json:"isCustomProperty"`
+	PropertyValue    Value  `json:"propertyValue"`
+}
+
 type IntValue struct {
-	Value int `json:"value"`
+	Value int64 `json:"value"`
 }
 
 func (IntValue) IsValue() {}
 
-type MlmdDataset struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+func (IntValue) IsStructValueType() {}
+
+// List values usable inside StructValue
+type ListValue struct {
+	Value []StructValueType `json:"value,omitempty"`
 }
 
-func (MlmdDataset) IsArtifactTypeInterface()    {}
-func (this MlmdDataset) GetID() *string         { return this.ID }
-func (this MlmdDataset) GetName() string        { return this.Name }
-func (this MlmdDataset) GetVersion() string     { return this.Version }
-func (this MlmdDataset) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdDataset) GetDescription() string { return this.Description }
-func (this MlmdDataset) GetExternalID() *string { return this.ExternalID }
-func (this MlmdDataset) GetProperties() []*TypeProperty {
+func (ListValue) IsStructValueType() {}
+
+type MlmdDataset struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	IntProp                  *int64              `json:"intProp,omitempty"`
+	SecondProp               *float64            `json:"secondProp,omitempty"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlmdDataset) IsArtifactInterface()                    {}
+func (this MlmdDataset) GetID() string                      { return this.ID }
+func (this MlmdDataset) GetTypeID() string                  { return this.TypeID }
+func (this MlmdDataset) GetURI() *string                    { return this.URI }
+func (this MlmdDataset) GetState() *ArtifactState           { return this.State }
+func (this MlmdDataset) GetName() *string                   { return this.Name }
+func (this MlmdDataset) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdDataset) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdDataset) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdDataset) GetType() *ArtifactType             { return this.Type }
+func (this MlmdDataset) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
-
-func (MlmdDataset) IsType() {}
+func (this MlmdDataset) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdDataset) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type MlmdDeploy struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	InputType   string          `json:"inputType"`
-	OutputType  string          `json:"outputType"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*Association      `json:"associations,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-func (MlmdDeploy) IsExecutionTypeInterface()   {}
-func (this MlmdDeploy) GetID() *string         { return this.ID }
-func (this MlmdDeploy) GetName() string        { return this.Name }
-func (this MlmdDeploy) GetVersion() string     { return this.Version }
-func (this MlmdDeploy) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdDeploy) GetDescription() string { return this.Description }
-func (this MlmdDeploy) GetExternalID() *string { return this.ExternalID }
-func (this MlmdDeploy) GetInputType() string   { return this.InputType }
-func (this MlmdDeploy) GetOutputType() string  { return this.OutputType }
-func (this MlmdDeploy) GetProperties() []*TypeProperty {
+func (MlmdDeploy) IsExecutionInterface()                   {}
+func (this MlmdDeploy) GetID() string                      { return this.ID }
+func (this MlmdDeploy) GetTypeID() string                  { return this.TypeID }
+func (this MlmdDeploy) GetLastKnownState() *ExecutionState { return this.LastKnownState }
+func (this MlmdDeploy) GetName() *string                   { return this.Name }
+func (this MlmdDeploy) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdDeploy) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdDeploy) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdDeploy) GetType() *ExecutionType            { return this.Type }
+func (this MlmdDeploy) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
-
-func (MlmdDeploy) IsType() {}
+func (this MlmdDeploy) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdDeploy) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type MlmdEvaluate struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	InputType   string          `json:"inputType"`
-	OutputType  string          `json:"outputType"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*Association      `json:"associations,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-func (MlmdEvaluate) IsExecutionTypeInterface()   {}
-func (this MlmdEvaluate) GetID() *string         { return this.ID }
-func (this MlmdEvaluate) GetName() string        { return this.Name }
-func (this MlmdEvaluate) GetVersion() string     { return this.Version }
-func (this MlmdEvaluate) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdEvaluate) GetDescription() string { return this.Description }
-func (this MlmdEvaluate) GetExternalID() *string { return this.ExternalID }
-func (this MlmdEvaluate) GetInputType() string   { return this.InputType }
-func (this MlmdEvaluate) GetOutputType() string  { return this.OutputType }
-func (this MlmdEvaluate) GetProperties() []*TypeProperty {
+func (MlmdEvaluate) IsExecutionInterface()                   {}
+func (this MlmdEvaluate) GetID() string                      { return this.ID }
+func (this MlmdEvaluate) GetTypeID() string                  { return this.TypeID }
+func (this MlmdEvaluate) GetLastKnownState() *ExecutionState { return this.LastKnownState }
+func (this MlmdEvaluate) GetName() *string                   { return this.Name }
+func (this MlmdEvaluate) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdEvaluate) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdEvaluate) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdEvaluate) GetType() *ExecutionType            { return this.Type }
+func (this MlmdEvaluate) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
-
-func (MlmdEvaluate) IsType() {}
+func (this MlmdEvaluate) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdEvaluate) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type MlmdMetrics struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	StringProp               *string             `json:"stringProp,omitempty"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-func (MlmdMetrics) IsArtifactTypeInterface()    {}
-func (this MlmdMetrics) GetID() *string         { return this.ID }
-func (this MlmdMetrics) GetName() string        { return this.Name }
-func (this MlmdMetrics) GetVersion() string     { return this.Version }
-func (this MlmdMetrics) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdMetrics) GetDescription() string { return this.Description }
-func (this MlmdMetrics) GetExternalID() *string { return this.ExternalID }
-func (this MlmdMetrics) GetProperties() []*TypeProperty {
+func (MlmdMetrics) IsArtifactInterface()                    {}
+func (this MlmdMetrics) GetID() string                      { return this.ID }
+func (this MlmdMetrics) GetTypeID() string                  { return this.TypeID }
+func (this MlmdMetrics) GetURI() *string                    { return this.URI }
+func (this MlmdMetrics) GetState() *ArtifactState           { return this.State }
+func (this MlmdMetrics) GetName() *string                   { return this.Name }
+func (this MlmdMetrics) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdMetrics) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdMetrics) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdMetrics) GetType() *ArtifactType             { return this.Type }
+func (this MlmdMetrics) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
-
-func (MlmdMetrics) IsType() {}
+func (this MlmdMetrics) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdMetrics) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type MlmdModel struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	DoubleProp               *float64            `json:"doubleProp,omitempty"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-func (MlmdModel) IsArtifactTypeInterface()    {}
-func (this MlmdModel) GetID() *string         { return this.ID }
-func (this MlmdModel) GetName() string        { return this.Name }
-func (this MlmdModel) GetVersion() string     { return this.Version }
-func (this MlmdModel) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdModel) GetDescription() string { return this.Description }
-func (this MlmdModel) GetExternalID() *string { return this.ExternalID }
-func (this MlmdModel) GetProperties() []*TypeProperty {
+func (MlmdModel) IsArtifactInterface()                    {}
+func (this MlmdModel) GetID() string                      { return this.ID }
+func (this MlmdModel) GetTypeID() string                  { return this.TypeID }
+func (this MlmdModel) GetURI() *string                    { return this.URI }
+func (this MlmdModel) GetState() *ArtifactState           { return this.State }
+func (this MlmdModel) GetName() *string                   { return this.Name }
+func (this MlmdModel) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdModel) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdModel) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdModel) GetType() *ArtifactType             { return this.Type }
+func (this MlmdModel) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
-
-func (MlmdModel) IsType() {}
+func (this MlmdModel) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdModel) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type MlmdProcess struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	InputType   string          `json:"inputType"`
-	OutputType  string          `json:"outputType"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*Association      `json:"associations,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-func (MlmdProcess) IsExecutionTypeInterface()   {}
-func (this MlmdProcess) GetID() *string         { return this.ID }
-func (this MlmdProcess) GetName() string        { return this.Name }
-func (this MlmdProcess) GetVersion() string     { return this.Version }
-func (this MlmdProcess) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdProcess) GetDescription() string { return this.Description }
-func (this MlmdProcess) GetExternalID() *string { return this.ExternalID }
-func (this MlmdProcess) GetInputType() string   { return this.InputType }
-func (this MlmdProcess) GetOutputType() string  { return this.OutputType }
-func (this MlmdProcess) GetProperties() []*TypeProperty {
+func (MlmdProcess) IsExecutionInterface()                   {}
+func (this MlmdProcess) GetID() string                      { return this.ID }
+func (this MlmdProcess) GetTypeID() string                  { return this.TypeID }
+func (this MlmdProcess) GetLastKnownState() *ExecutionState { return this.LastKnownState }
+func (this MlmdProcess) GetName() *string                   { return this.Name }
+func (this MlmdProcess) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdProcess) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdProcess) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdProcess) GetType() *ExecutionType            { return this.Type }
+func (this MlmdProcess) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
-
-func (MlmdProcess) IsType() {}
+func (this MlmdProcess) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdProcess) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type MlmdStatistics struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	StructProp               []*StructTuple      `json:"structProp,omitempty"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-func (MlmdStatistics) IsArtifactTypeInterface()    {}
-func (this MlmdStatistics) GetID() *string         { return this.ID }
-func (this MlmdStatistics) GetName() string        { return this.Name }
-func (this MlmdStatistics) GetVersion() string     { return this.Version }
-func (this MlmdStatistics) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdStatistics) GetDescription() string { return this.Description }
-func (this MlmdStatistics) GetExternalID() *string { return this.ExternalID }
-func (this MlmdStatistics) GetProperties() []*TypeProperty {
+func (MlmdStatistics) IsArtifactInterface()                    {}
+func (this MlmdStatistics) GetID() string                      { return this.ID }
+func (this MlmdStatistics) GetTypeID() string                  { return this.TypeID }
+func (this MlmdStatistics) GetURI() *string                    { return this.URI }
+func (this MlmdStatistics) GetState() *ArtifactState           { return this.State }
+func (this MlmdStatistics) GetName() *string                   { return this.Name }
+func (this MlmdStatistics) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdStatistics) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdStatistics) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdStatistics) GetType() *ArtifactType             { return this.Type }
+func (this MlmdStatistics) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
-
-func (MlmdStatistics) IsType() {}
+func (this MlmdStatistics) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdStatistics) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type MlmdTrain struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	InputType   string          `json:"inputType"`
-	OutputType  string          `json:"outputType"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	ProtoProp                *ProtoTypeValue     `json:"protoProp,omitempty"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*Association      `json:"associations,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-func (MlmdTrain) IsExecutionTypeInterface()   {}
-func (this MlmdTrain) GetID() *string         { return this.ID }
-func (this MlmdTrain) GetName() string        { return this.Name }
-func (this MlmdTrain) GetVersion() string     { return this.Version }
-func (this MlmdTrain) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdTrain) GetDescription() string { return this.Description }
-func (this MlmdTrain) GetExternalID() *string { return this.ExternalID }
-func (this MlmdTrain) GetInputType() string   { return this.InputType }
-func (this MlmdTrain) GetOutputType() string  { return this.OutputType }
-func (this MlmdTrain) GetProperties() []*TypeProperty {
+func (MlmdTrain) IsExecutionInterface()                   {}
+func (this MlmdTrain) GetID() string                      { return this.ID }
+func (this MlmdTrain) GetTypeID() string                  { return this.TypeID }
+func (this MlmdTrain) GetLastKnownState() *ExecutionState { return this.LastKnownState }
+func (this MlmdTrain) GetName() *string                   { return this.Name }
+func (this MlmdTrain) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdTrain) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdTrain) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdTrain) GetType() *ExecutionType            { return this.Type }
+func (this MlmdTrain) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
-
-func (MlmdTrain) IsType() {}
+func (this MlmdTrain) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdTrain) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type MlmdTransform struct {
-	ID          *string         `json:"id,omitempty"`
-	Name        string          `json:"name"`
-	Version     string          `json:"version"`
-	TypeKind    int             `json:"typeKind"`
-	Description string          `json:"description"`
-	ExternalID  *string         `json:"externalId,omitempty"`
-	InputType   string          `json:"inputType"`
-	OutputType  string          `json:"outputType"`
-	Properties  []*TypeProperty `json:"properties,omitempty"`
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	BooleanProp              *bool               `json:"booleanProp,omitempty"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*Association      `json:"associations,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
 }
 
-func (MlmdTransform) IsExecutionTypeInterface()   {}
-func (this MlmdTransform) GetID() *string         { return this.ID }
-func (this MlmdTransform) GetName() string        { return this.Name }
-func (this MlmdTransform) GetVersion() string     { return this.Version }
-func (this MlmdTransform) GetTypeKind() int       { return this.TypeKind }
-func (this MlmdTransform) GetDescription() string { return this.Description }
-func (this MlmdTransform) GetExternalID() *string { return this.ExternalID }
-func (this MlmdTransform) GetInputType() string   { return this.InputType }
-func (this MlmdTransform) GetOutputType() string  { return this.OutputType }
-func (this MlmdTransform) GetProperties() []*TypeProperty {
+func (MlmdTransform) IsExecutionInterface()                   {}
+func (this MlmdTransform) GetID() string                      { return this.ID }
+func (this MlmdTransform) GetTypeID() string                  { return this.TypeID }
+func (this MlmdTransform) GetLastKnownState() *ExecutionState { return this.LastKnownState }
+func (this MlmdTransform) GetName() *string                   { return this.Name }
+func (this MlmdTransform) GetExternalID() *string             { return this.ExternalID }
+func (this MlmdTransform) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlmdTransform) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlmdTransform) GetType() *ExecutionType            { return this.Type }
+func (this MlmdTransform) GetProperties() []*InstanceProperty {
 	if this.Properties == nil {
 		return nil
 	}
-	interfaceSlice := make([]*TypeProperty, 0, len(this.Properties))
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
 	for _, concrete := range this.Properties {
 		interfaceSlice = append(interfaceSlice, concrete)
 	}
 	return interfaceSlice
 }
+func (this MlmdTransform) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlmdTransform) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
-func (MlmdTransform) IsType() {}
+type MlschemaAlgorithm struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaAlgorithm) IsArtifactInterface()                {}
+func (this MlschemaAlgorithm) GetID() string                  { return this.ID }
+func (this MlschemaAlgorithm) GetTypeID() string              { return this.TypeID }
+func (this MlschemaAlgorithm) GetURI() *string                { return this.URI }
+func (this MlschemaAlgorithm) GetState() *ArtifactState       { return this.State }
+func (this MlschemaAlgorithm) GetName() *string               { return this.Name }
+func (this MlschemaAlgorithm) GetExternalID() *string         { return this.ExternalID }
+func (this MlschemaAlgorithm) GetCreateTimeSinceEpoch() int64 { return this.CreateTimeSinceEpoch }
+func (this MlschemaAlgorithm) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaAlgorithm) GetType() *ArtifactType { return this.Type }
+func (this MlschemaAlgorithm) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaAlgorithm) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaAlgorithm) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaData struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaData) IsArtifactInterface()                    {}
+func (this MlschemaData) GetID() string                      { return this.ID }
+func (this MlschemaData) GetTypeID() string                  { return this.TypeID }
+func (this MlschemaData) GetURI() *string                    { return this.URI }
+func (this MlschemaData) GetState() *ArtifactState           { return this.State }
+func (this MlschemaData) GetName() *string                   { return this.Name }
+func (this MlschemaData) GetExternalID() *string             { return this.ExternalID }
+func (this MlschemaData) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlschemaData) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlschemaData) GetType() *ArtifactType             { return this.Type }
+func (this MlschemaData) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaData) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaData) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaDataCharacteristic struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	Name                     string              `json:"name"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ContextType        `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Parents                  []ContextInterface  `json:"parents,omitempty"`
+	Children                 []ContextInterface  `json:"children,omitempty"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Associations             []*Association      `json:"associations,omitempty"`
+}
+
+func (MlschemaDataCharacteristic) IsContextInterface()         {}
+func (this MlschemaDataCharacteristic) GetID() string          { return this.ID }
+func (this MlschemaDataCharacteristic) GetTypeID() string      { return this.TypeID }
+func (this MlschemaDataCharacteristic) GetName() string        { return this.Name }
+func (this MlschemaDataCharacteristic) GetExternalID() *string { return this.ExternalID }
+func (this MlschemaDataCharacteristic) GetCreateTimeSinceEpoch() int64 {
+	return this.CreateTimeSinceEpoch
+}
+func (this MlschemaDataCharacteristic) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaDataCharacteristic) GetType() *ContextType { return this.Type }
+func (this MlschemaDataCharacteristic) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaDataCharacteristic) GetParents() []ContextInterface {
+	if this.Parents == nil {
+		return nil
+	}
+	interfaceSlice := make([]ContextInterface, 0, len(this.Parents))
+	for _, concrete := range this.Parents {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaDataCharacteristic) GetChildren() []ContextInterface {
+	if this.Children == nil {
+		return nil
+	}
+	interfaceSlice := make([]ContextInterface, 0, len(this.Children))
+	for _, concrete := range this.Children {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaDataCharacteristic) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaDataCharacteristic) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaDataSet struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaDataSet) IsArtifactInterface()                    {}
+func (this MlschemaDataSet) GetID() string                      { return this.ID }
+func (this MlschemaDataSet) GetTypeID() string                  { return this.TypeID }
+func (this MlschemaDataSet) GetURI() *string                    { return this.URI }
+func (this MlschemaDataSet) GetState() *ArtifactState           { return this.State }
+func (this MlschemaDataSet) GetName() *string                   { return this.Name }
+func (this MlschemaDataSet) GetExternalID() *string             { return this.ExternalID }
+func (this MlschemaDataSet) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlschemaDataSet) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlschemaDataSet) GetType() *ArtifactType             { return this.Type }
+func (this MlschemaDataSet) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaDataSet) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaDataSet) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaDatasetCharacteristic struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaDatasetCharacteristic) IsArtifactInterface()          {}
+func (this MlschemaDatasetCharacteristic) GetID() string            { return this.ID }
+func (this MlschemaDatasetCharacteristic) GetTypeID() string        { return this.TypeID }
+func (this MlschemaDatasetCharacteristic) GetURI() *string          { return this.URI }
+func (this MlschemaDatasetCharacteristic) GetState() *ArtifactState { return this.State }
+func (this MlschemaDatasetCharacteristic) GetName() *string         { return this.Name }
+func (this MlschemaDatasetCharacteristic) GetExternalID() *string   { return this.ExternalID }
+func (this MlschemaDatasetCharacteristic) GetCreateTimeSinceEpoch() int64 {
+	return this.CreateTimeSinceEpoch
+}
+func (this MlschemaDatasetCharacteristic) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaDatasetCharacteristic) GetType() *ArtifactType { return this.Type }
+func (this MlschemaDatasetCharacteristic) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaDatasetCharacteristic) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaDatasetCharacteristic) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaEvaluationMeasure struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaEvaluationMeasure) IsArtifactInterface()          {}
+func (this MlschemaEvaluationMeasure) GetID() string            { return this.ID }
+func (this MlschemaEvaluationMeasure) GetTypeID() string        { return this.TypeID }
+func (this MlschemaEvaluationMeasure) GetURI() *string          { return this.URI }
+func (this MlschemaEvaluationMeasure) GetState() *ArtifactState { return this.State }
+func (this MlschemaEvaluationMeasure) GetName() *string         { return this.Name }
+func (this MlschemaEvaluationMeasure) GetExternalID() *string   { return this.ExternalID }
+func (this MlschemaEvaluationMeasure) GetCreateTimeSinceEpoch() int64 {
+	return this.CreateTimeSinceEpoch
+}
+func (this MlschemaEvaluationMeasure) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaEvaluationMeasure) GetType() *ArtifactType { return this.Type }
+func (this MlschemaEvaluationMeasure) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaEvaluationMeasure) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaEvaluationMeasure) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaEvaluationProcedure struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaEvaluationProcedure) IsArtifactInterface()          {}
+func (this MlschemaEvaluationProcedure) GetID() string            { return this.ID }
+func (this MlschemaEvaluationProcedure) GetTypeID() string        { return this.TypeID }
+func (this MlschemaEvaluationProcedure) GetURI() *string          { return this.URI }
+func (this MlschemaEvaluationProcedure) GetState() *ArtifactState { return this.State }
+func (this MlschemaEvaluationProcedure) GetName() *string         { return this.Name }
+func (this MlschemaEvaluationProcedure) GetExternalID() *string   { return this.ExternalID }
+func (this MlschemaEvaluationProcedure) GetCreateTimeSinceEpoch() int64 {
+	return this.CreateTimeSinceEpoch
+}
+func (this MlschemaEvaluationProcedure) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaEvaluationProcedure) GetType() *ArtifactType { return this.Type }
+func (this MlschemaEvaluationProcedure) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaEvaluationProcedure) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaEvaluationProcedure) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaEvaluationSpecification struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaEvaluationSpecification) IsArtifactInterface()          {}
+func (this MlschemaEvaluationSpecification) GetID() string            { return this.ID }
+func (this MlschemaEvaluationSpecification) GetTypeID() string        { return this.TypeID }
+func (this MlschemaEvaluationSpecification) GetURI() *string          { return this.URI }
+func (this MlschemaEvaluationSpecification) GetState() *ArtifactState { return this.State }
+func (this MlschemaEvaluationSpecification) GetName() *string         { return this.Name }
+func (this MlschemaEvaluationSpecification) GetExternalID() *string   { return this.ExternalID }
+func (this MlschemaEvaluationSpecification) GetCreateTimeSinceEpoch() int64 {
+	return this.CreateTimeSinceEpoch
+}
+func (this MlschemaEvaluationSpecification) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaEvaluationSpecification) GetType() *ArtifactType { return this.Type }
+func (this MlschemaEvaluationSpecification) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaEvaluationSpecification) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaEvaluationSpecification) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaExperiment struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*Association      `json:"associations,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaExperiment) IsExecutionInterface()                   {}
+func (this MlschemaExperiment) GetID() string                      { return this.ID }
+func (this MlschemaExperiment) GetTypeID() string                  { return this.TypeID }
+func (this MlschemaExperiment) GetLastKnownState() *ExecutionState { return this.LastKnownState }
+func (this MlschemaExperiment) GetName() *string                   { return this.Name }
+func (this MlschemaExperiment) GetExternalID() *string             { return this.ExternalID }
+func (this MlschemaExperiment) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlschemaExperiment) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaExperiment) GetType() *ExecutionType { return this.Type }
+func (this MlschemaExperiment) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaExperiment) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaExperiment) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaFeature struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaFeature) IsArtifactInterface()                    {}
+func (this MlschemaFeature) GetID() string                      { return this.ID }
+func (this MlschemaFeature) GetTypeID() string                  { return this.TypeID }
+func (this MlschemaFeature) GetURI() *string                    { return this.URI }
+func (this MlschemaFeature) GetState() *ArtifactState           { return this.State }
+func (this MlschemaFeature) GetName() *string                   { return this.Name }
+func (this MlschemaFeature) GetExternalID() *string             { return this.ExternalID }
+func (this MlschemaFeature) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlschemaFeature) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlschemaFeature) GetType() *ArtifactType             { return this.Type }
+func (this MlschemaFeature) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaFeature) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaFeature) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaFeatureCharacteristic struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaFeatureCharacteristic) IsArtifactInterface()          {}
+func (this MlschemaFeatureCharacteristic) GetID() string            { return this.ID }
+func (this MlschemaFeatureCharacteristic) GetTypeID() string        { return this.TypeID }
+func (this MlschemaFeatureCharacteristic) GetURI() *string          { return this.URI }
+func (this MlschemaFeatureCharacteristic) GetState() *ArtifactState { return this.State }
+func (this MlschemaFeatureCharacteristic) GetName() *string         { return this.Name }
+func (this MlschemaFeatureCharacteristic) GetExternalID() *string   { return this.ExternalID }
+func (this MlschemaFeatureCharacteristic) GetCreateTimeSinceEpoch() int64 {
+	return this.CreateTimeSinceEpoch
+}
+func (this MlschemaFeatureCharacteristic) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaFeatureCharacteristic) GetType() *ArtifactType { return this.Type }
+func (this MlschemaFeatureCharacteristic) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaFeatureCharacteristic) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaFeatureCharacteristic) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaHyperParameter struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaHyperParameter) IsArtifactInterface()                {}
+func (this MlschemaHyperParameter) GetID() string                  { return this.ID }
+func (this MlschemaHyperParameter) GetTypeID() string              { return this.TypeID }
+func (this MlschemaHyperParameter) GetURI() *string                { return this.URI }
+func (this MlschemaHyperParameter) GetState() *ArtifactState       { return this.State }
+func (this MlschemaHyperParameter) GetName() *string               { return this.Name }
+func (this MlschemaHyperParameter) GetExternalID() *string         { return this.ExternalID }
+func (this MlschemaHyperParameter) GetCreateTimeSinceEpoch() int64 { return this.CreateTimeSinceEpoch }
+func (this MlschemaHyperParameter) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaHyperParameter) GetType() *ArtifactType { return this.Type }
+func (this MlschemaHyperParameter) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaHyperParameter) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaHyperParameter) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaHyperParameterSetting struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaHyperParameterSetting) IsArtifactInterface()          {}
+func (this MlschemaHyperParameterSetting) GetID() string            { return this.ID }
+func (this MlschemaHyperParameterSetting) GetTypeID() string        { return this.TypeID }
+func (this MlschemaHyperParameterSetting) GetURI() *string          { return this.URI }
+func (this MlschemaHyperParameterSetting) GetState() *ArtifactState { return this.State }
+func (this MlschemaHyperParameterSetting) GetName() *string         { return this.Name }
+func (this MlschemaHyperParameterSetting) GetExternalID() *string   { return this.ExternalID }
+func (this MlschemaHyperParameterSetting) GetCreateTimeSinceEpoch() int64 {
+	return this.CreateTimeSinceEpoch
+}
+func (this MlschemaHyperParameterSetting) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaHyperParameterSetting) GetType() *ArtifactType { return this.Type }
+func (this MlschemaHyperParameterSetting) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaHyperParameterSetting) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaHyperParameterSetting) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaImplementation struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaImplementation) IsArtifactInterface()                {}
+func (this MlschemaImplementation) GetID() string                  { return this.ID }
+func (this MlschemaImplementation) GetTypeID() string              { return this.TypeID }
+func (this MlschemaImplementation) GetURI() *string                { return this.URI }
+func (this MlschemaImplementation) GetState() *ArtifactState       { return this.State }
+func (this MlschemaImplementation) GetName() *string               { return this.Name }
+func (this MlschemaImplementation) GetExternalID() *string         { return this.ExternalID }
+func (this MlschemaImplementation) GetCreateTimeSinceEpoch() int64 { return this.CreateTimeSinceEpoch }
+func (this MlschemaImplementation) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaImplementation) GetType() *ArtifactType { return this.Type }
+func (this MlschemaImplementation) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaImplementation) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaImplementation) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaImplementationCharacteristic struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaImplementationCharacteristic) IsArtifactInterface()          {}
+func (this MlschemaImplementationCharacteristic) GetID() string            { return this.ID }
+func (this MlschemaImplementationCharacteristic) GetTypeID() string        { return this.TypeID }
+func (this MlschemaImplementationCharacteristic) GetURI() *string          { return this.URI }
+func (this MlschemaImplementationCharacteristic) GetState() *ArtifactState { return this.State }
+func (this MlschemaImplementationCharacteristic) GetName() *string         { return this.Name }
+func (this MlschemaImplementationCharacteristic) GetExternalID() *string   { return this.ExternalID }
+func (this MlschemaImplementationCharacteristic) GetCreateTimeSinceEpoch() int64 {
+	return this.CreateTimeSinceEpoch
+}
+func (this MlschemaImplementationCharacteristic) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaImplementationCharacteristic) GetType() *ArtifactType { return this.Type }
+func (this MlschemaImplementationCharacteristic) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaImplementationCharacteristic) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaImplementationCharacteristic) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaModel struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaModel) IsArtifactInterface()                    {}
+func (this MlschemaModel) GetID() string                      { return this.ID }
+func (this MlschemaModel) GetTypeID() string                  { return this.TypeID }
+func (this MlschemaModel) GetURI() *string                    { return this.URI }
+func (this MlschemaModel) GetState() *ArtifactState           { return this.State }
+func (this MlschemaModel) GetName() *string                   { return this.Name }
+func (this MlschemaModel) GetExternalID() *string             { return this.ExternalID }
+func (this MlschemaModel) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlschemaModel) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlschemaModel) GetType() *ArtifactType             { return this.Type }
+func (this MlschemaModel) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaModel) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaModel) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaModelEvaluation struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaModelEvaluation) IsArtifactInterface()                {}
+func (this MlschemaModelEvaluation) GetID() string                  { return this.ID }
+func (this MlschemaModelEvaluation) GetTypeID() string              { return this.TypeID }
+func (this MlschemaModelEvaluation) GetURI() *string                { return this.URI }
+func (this MlschemaModelEvaluation) GetState() *ArtifactState       { return this.State }
+func (this MlschemaModelEvaluation) GetName() *string               { return this.Name }
+func (this MlschemaModelEvaluation) GetExternalID() *string         { return this.ExternalID }
+func (this MlschemaModelEvaluation) GetCreateTimeSinceEpoch() int64 { return this.CreateTimeSinceEpoch }
+func (this MlschemaModelEvaluation) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaModelEvaluation) GetType() *ArtifactType { return this.Type }
+func (this MlschemaModelEvaluation) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaModelEvaluation) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaModelEvaluation) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaModelVersion struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	Name                     string              `json:"name"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ContextType        `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Parents                  []ContextInterface  `json:"parents,omitempty"`
+	Children                 []ContextInterface  `json:"children,omitempty"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Associations             []*Association      `json:"associations,omitempty"`
+}
+
+func (MlschemaModelVersion) IsContextInterface()                 {}
+func (this MlschemaModelVersion) GetID() string                  { return this.ID }
+func (this MlschemaModelVersion) GetTypeID() string              { return this.TypeID }
+func (this MlschemaModelVersion) GetName() string                { return this.Name }
+func (this MlschemaModelVersion) GetExternalID() *string         { return this.ExternalID }
+func (this MlschemaModelVersion) GetCreateTimeSinceEpoch() int64 { return this.CreateTimeSinceEpoch }
+func (this MlschemaModelVersion) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaModelVersion) GetType() *ContextType { return this.Type }
+func (this MlschemaModelVersion) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaModelVersion) GetParents() []ContextInterface {
+	if this.Parents == nil {
+		return nil
+	}
+	interfaceSlice := make([]ContextInterface, 0, len(this.Parents))
+	for _, concrete := range this.Parents {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaModelVersion) GetChildren() []ContextInterface {
+	if this.Children == nil {
+		return nil
+	}
+	interfaceSlice := make([]ContextInterface, 0, len(this.Children))
+	for _, concrete := range this.Children {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaModelVersion) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaModelVersion) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaRegisteredModel struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	Name                     string              `json:"name"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ContextType        `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Parents                  []ContextInterface  `json:"parents,omitempty"`
+	Children                 []ContextInterface  `json:"children,omitempty"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Associations             []*Association      `json:"associations,omitempty"`
+}
+
+func (MlschemaRegisteredModel) IsContextInterface()                 {}
+func (this MlschemaRegisteredModel) GetID() string                  { return this.ID }
+func (this MlschemaRegisteredModel) GetTypeID() string              { return this.TypeID }
+func (this MlschemaRegisteredModel) GetName() string                { return this.Name }
+func (this MlschemaRegisteredModel) GetExternalID() *string         { return this.ExternalID }
+func (this MlschemaRegisteredModel) GetCreateTimeSinceEpoch() int64 { return this.CreateTimeSinceEpoch }
+func (this MlschemaRegisteredModel) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaRegisteredModel) GetType() *ContextType { return this.Type }
+func (this MlschemaRegisteredModel) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaRegisteredModel) GetParents() []ContextInterface {
+	if this.Parents == nil {
+		return nil
+	}
+	interfaceSlice := make([]ContextInterface, 0, len(this.Parents))
+	for _, concrete := range this.Parents {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaRegisteredModel) GetChildren() []ContextInterface {
+	if this.Children == nil {
+		return nil
+	}
+	interfaceSlice := make([]ContextInterface, 0, len(this.Children))
+	for _, concrete := range this.Children {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaRegisteredModel) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaRegisteredModel) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaRun struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*Association      `json:"associations,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaRun) IsExecutionInterface()                   {}
+func (this MlschemaRun) GetID() string                      { return this.ID }
+func (this MlschemaRun) GetTypeID() string                  { return this.TypeID }
+func (this MlschemaRun) GetLastKnownState() *ExecutionState { return this.LastKnownState }
+func (this MlschemaRun) GetName() *string                   { return this.Name }
+func (this MlschemaRun) GetExternalID() *string             { return this.ExternalID }
+func (this MlschemaRun) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlschemaRun) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlschemaRun) GetType() *ExecutionType            { return this.Type }
+func (this MlschemaRun) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaRun) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaRun) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaSoftware struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaSoftware) IsArtifactInterface()                {}
+func (this MlschemaSoftware) GetID() string                  { return this.ID }
+func (this MlschemaSoftware) GetTypeID() string              { return this.TypeID }
+func (this MlschemaSoftware) GetURI() *string                { return this.URI }
+func (this MlschemaSoftware) GetState() *ArtifactState       { return this.State }
+func (this MlschemaSoftware) GetName() *string               { return this.Name }
+func (this MlschemaSoftware) GetExternalID() *string         { return this.ExternalID }
+func (this MlschemaSoftware) GetCreateTimeSinceEpoch() int64 { return this.CreateTimeSinceEpoch }
+func (this MlschemaSoftware) GetLastUpdateTimeSinceEpoch() int64 {
+	return this.LastUpdateTimeSinceEpoch
+}
+func (this MlschemaSoftware) GetType() *ArtifactType { return this.Type }
+func (this MlschemaSoftware) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaSoftware) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaSoftware) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaStudy struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	LastKnownState           *ExecutionState     `json:"lastKnownState,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ExecutionType      `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Associations             []*Association      `json:"associations,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaStudy) IsExecutionInterface()                   {}
+func (this MlschemaStudy) GetID() string                      { return this.ID }
+func (this MlschemaStudy) GetTypeID() string                  { return this.TypeID }
+func (this MlschemaStudy) GetLastKnownState() *ExecutionState { return this.LastKnownState }
+func (this MlschemaStudy) GetName() *string                   { return this.Name }
+func (this MlschemaStudy) GetExternalID() *string             { return this.ExternalID }
+func (this MlschemaStudy) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlschemaStudy) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlschemaStudy) GetType() *ExecutionType            { return this.Type }
+func (this MlschemaStudy) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaStudy) GetAssociations() []*Association {
+	if this.Associations == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Association, 0, len(this.Associations))
+	for _, concrete := range this.Associations {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaStudy) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+type MlschemaTask struct {
+	ID                       string              `json:"id"`
+	TypeID                   string              `json:"typeId"`
+	URI                      *string             `json:"uri,omitempty"`
+	State                    *ArtifactState      `json:"state,omitempty"`
+	Name                     *string             `json:"name,omitempty"`
+	ExternalID               *string             `json:"externalId,omitempty"`
+	CreateTimeSinceEpoch     int64               `json:"createTimeSinceEpoch"`
+	LastUpdateTimeSinceEpoch int64               `json:"lastUpdateTimeSinceEpoch"`
+	Type                     *ArtifactType       `json:"type"`
+	Properties               []*InstanceProperty `json:"properties"`
+	Attributions             []*Attribution      `json:"attributions,omitempty"`
+	Events                   []*Event            `json:"events,omitempty"`
+}
+
+func (MlschemaTask) IsArtifactInterface()                    {}
+func (this MlschemaTask) GetID() string                      { return this.ID }
+func (this MlschemaTask) GetTypeID() string                  { return this.TypeID }
+func (this MlschemaTask) GetURI() *string                    { return this.URI }
+func (this MlschemaTask) GetState() *ArtifactState           { return this.State }
+func (this MlschemaTask) GetName() *string                   { return this.Name }
+func (this MlschemaTask) GetExternalID() *string             { return this.ExternalID }
+func (this MlschemaTask) GetCreateTimeSinceEpoch() int64     { return this.CreateTimeSinceEpoch }
+func (this MlschemaTask) GetLastUpdateTimeSinceEpoch() int64 { return this.LastUpdateTimeSinceEpoch }
+func (this MlschemaTask) GetType() *ArtifactType             { return this.Type }
+func (this MlschemaTask) GetProperties() []*InstanceProperty {
+	if this.Properties == nil {
+		return nil
+	}
+	interfaceSlice := make([]*InstanceProperty, 0, len(this.Properties))
+	for _, concrete := range this.Properties {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaTask) GetAttributions() []*Attribution {
+	if this.Attributions == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Attribution, 0, len(this.Attributions))
+	for _, concrete := range this.Attributions {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this MlschemaTask) GetEvents() []*Event {
+	if this.Events == nil {
+		return nil
+	}
+	interfaceSlice := make([]*Event, 0, len(this.Events))
+	for _, concrete := range this.Events {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+
+// ProtoTypeValue is a byte array with an optional typeUrl describing the protobuf type
+type ProtoTypeValue struct {
+	TypeURL *string `json:"typeUrl,omitempty"`
+	Value   []byte  `json:"value,omitempty"`
+}
+
+// ProtoValue wraps a ProtoTypeValue tuple
+type ProtoValue struct {
+	Value *ProtoTypeValue `json:"value"`
+}
+
+func (ProtoValue) IsValue() {}
 
 type StringValue struct {
 	Value string `json:"value"`
 }
 
 func (StringValue) IsValue() {}
+
+func (StringValue) IsStructValueType() {}
+
+// Entry in an StructValue map
+type StructTuple struct {
+	Key   string          `json:"key"`
+	Value StructValueType `json:"value,omitempty"`
+}
+
+// StructValue is a key value map and supports list values
+type StructValue struct {
+	Value []*StructTuple `json:"value"`
+}
+
+func (StructValue) IsValue() {}
+
+func (StructValue) IsStructValueType() {}
 
 type TypeFilter struct {
 	Ids         []string `json:"ids,omitempty"`
@@ -555,8 +2343,298 @@ type TypeFilter struct {
 	ExternalIds []string `json:"externalIds,omitempty"`
 }
 
+// Type property
 type TypeProperty struct {
-	TypeID   string `json:"typeId"`
-	Name     string `json:"name"`
-	DataType int    `json:"dataType"`
+	Name     string   `json:"name"`
+	DataType DataType `json:"dataType"`
+}
+
+// Type property input
+type TypePropertyInput struct {
+	Name     string   `json:"name"`
+	DataType DataType `json:"dataType"`
+}
+
+// State of an Artifact
+type ArtifactState string
+
+const (
+	ArtifactStateUnknown ArtifactState = "UNKNOWN"
+	// A state indicating that the artifact may exist.
+	ArtifactStatePending ArtifactState = "PENDING"
+	// A state indicating that the artifact should exist, unless something
+	// external to the system deletes it.
+	ArtifactStateLive ArtifactState = "LIVE"
+	// A state indicating that the artifact should be deleted.
+	ArtifactStateMarkedForDeletion ArtifactState = "MARKED_FOR_DELETION"
+	// A state indicating that the artifact has been deleted.
+	ArtifactStateDeleted ArtifactState = "DELETED"
+	// A state indicating that the artifact has been abandoned, which may be
+	// due to a failed or cancelled execution.
+	ArtifactStateAbandoned ArtifactState = "ABANDONED"
+	// A state indicating that the artifact is a reference artifact. At
+	// execution start time, the orchestrator produces an output artifact for
+	// each output key with state PENDING. However, for an intermediate
+	// artifact, this first artifact's state will be REFERENCE. Intermediate
+	// artifacts emitted during a component's execution will copy the REFERENCE
+	// artifact's attributes. At the end of an execution, the artifact state
+	// should remain REFERENCE instead of being changed to LIVE.
+	ArtifactStateReference ArtifactState = "REFERENCE"
+)
+
+var AllArtifactState = []ArtifactState{
+	ArtifactStateUnknown,
+	ArtifactStatePending,
+	ArtifactStateLive,
+	ArtifactStateMarkedForDeletion,
+	ArtifactStateDeleted,
+	ArtifactStateAbandoned,
+	ArtifactStateReference,
+}
+
+func (e ArtifactState) IsValid() bool {
+	switch e {
+	case ArtifactStateUnknown, ArtifactStatePending, ArtifactStateLive, ArtifactStateMarkedForDeletion, ArtifactStateDeleted, ArtifactStateAbandoned, ArtifactStateReference:
+		return true
+	}
+	return false
+}
+
+func (e ArtifactState) String() string {
+	return string(e)
+}
+
+func (e *ArtifactState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ArtifactState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ArtifactState", str)
+	}
+	return nil
+}
+
+func (e ArtifactState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// DataType describes property value types
+type DataType string
+
+const (
+	DataTypeUnknown DataType = "UNKNOWN"
+	DataTypeInt     DataType = "INT"
+	DataTypeDouble  DataType = "DOUBLE"
+	DataTypeString  DataType = "STRING"
+	DataTypeStruct  DataType = "STRUCT"
+	DataTypeProto   DataType = "PROTO"
+	DataTypeBoolean DataType = "BOOLEAN"
+)
+
+var AllDataType = []DataType{
+	DataTypeUnknown,
+	DataTypeInt,
+	DataTypeDouble,
+	DataTypeString,
+	DataTypeStruct,
+	DataTypeProto,
+	DataTypeBoolean,
+}
+
+func (e DataType) IsValid() bool {
+	switch e {
+	case DataTypeUnknown, DataTypeInt, DataTypeDouble, DataTypeString, DataTypeStruct, DataTypeProto, DataTypeBoolean:
+		return true
+	}
+	return false
+}
+
+func (e DataType) String() string {
+	return string(e)
+}
+
+func (e *DataType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DataType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DataType", str)
+	}
+	return nil
+}
+
+func (e DataType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Events distinguish between an artifact that is written by the execution
+// (possibly as a cache), versus artifacts that are part of the declared
+// output of the Execution. For more information on what DECLARED_ means,
+// see the comment on the message.
+type EventType string
+
+const (
+	EventTypeUnknown EventType = "UNKNOWN"
+	// A declared output of the execution.
+	EventTypeDeclaredOutput EventType = "DECLARED_OUTPUT"
+	// A declared input of the execution.
+	EventTypeDeclaredInput EventType = "DECLARED_INPUT"
+	// An input of the execution.
+	EventTypeInput EventType = "INPUT"
+	// An output of the execution.
+	EventTypeOutput EventType = "OUTPUT"
+	// An internal input of the execution.
+	EventTypeInternalInput EventType = "INTERNAL_INPUT"
+	// An internal output of the execution.
+	EventTypeInternalOutput EventType = "INTERNAL_OUTPUT"
+	// A pending output of the execution.
+	EventTypePendingOutput EventType = "PENDING_OUTPUT"
+)
+
+var AllEventType = []EventType{
+	EventTypeUnknown,
+	EventTypeDeclaredOutput,
+	EventTypeDeclaredInput,
+	EventTypeInput,
+	EventTypeOutput,
+	EventTypeInternalInput,
+	EventTypeInternalOutput,
+	EventTypePendingOutput,
+}
+
+func (e EventType) IsValid() bool {
+	switch e {
+	case EventTypeUnknown, EventTypeDeclaredOutput, EventTypeDeclaredInput, EventTypeInput, EventTypeOutput, EventTypeInternalInput, EventTypeInternalOutput, EventTypePendingOutput:
+		return true
+	}
+	return false
+}
+
+func (e EventType) String() string {
+	return string(e)
+}
+
+func (e *EventType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EventType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EventType", str)
+	}
+	return nil
+}
+
+func (e EventType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// The state of the Execution. The state transitions are
+// NEW -> RUNNING -> COMPLETE | CACHED | FAILED | CANCELED
+// CACHED means the execution is skipped due to cached results.
+// CANCELED means the execution is skipped due to precondition not met. It is
+// different from CACHED in that a CANCELED execution will not have any event
+// associated with it. It is different from FAILED in that there is no
+// unexpected error happened and it is regarded as a normal state.
+type ExecutionState string
+
+const (
+	ExecutionStateUnknown  ExecutionState = "UNKNOWN"
+	ExecutionStateNew      ExecutionState = "NEW"
+	ExecutionStateRunning  ExecutionState = "RUNNING"
+	ExecutionStateComplete ExecutionState = "COMPLETE"
+	ExecutionStateFailed   ExecutionState = "FAILED"
+	ExecutionStateCached   ExecutionState = "CACHED"
+	ExecutionStateCanceled ExecutionState = "CANCELED"
+)
+
+var AllExecutionState = []ExecutionState{
+	ExecutionStateUnknown,
+	ExecutionStateNew,
+	ExecutionStateRunning,
+	ExecutionStateComplete,
+	ExecutionStateFailed,
+	ExecutionStateCached,
+	ExecutionStateCanceled,
+}
+
+func (e ExecutionState) IsValid() bool {
+	switch e {
+	case ExecutionStateUnknown, ExecutionStateNew, ExecutionStateRunning, ExecutionStateComplete, ExecutionStateFailed, ExecutionStateCached, ExecutionStateCanceled:
+		return true
+	}
+	return false
+}
+
+func (e ExecutionState) String() string {
+	return string(e)
+}
+
+func (e *ExecutionState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ExecutionState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ExecutionState", str)
+	}
+	return nil
+}
+
+func (e ExecutionState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// TypeKind describes metadata Types
+type TypeKind string
+
+const (
+	TypeKindExecutionType TypeKind = "EXECUTION_TYPE"
+	TypeKindArtifactType  TypeKind = "ARTIFACT_TYPE"
+	TypeKindContextType   TypeKind = "CONTEXT_TYPE"
+)
+
+var AllTypeKind = []TypeKind{
+	TypeKindExecutionType,
+	TypeKindArtifactType,
+	TypeKindContextType,
+}
+
+func (e TypeKind) IsValid() bool {
+	switch e {
+	case TypeKindExecutionType, TypeKindArtifactType, TypeKindContextType:
+		return true
+	}
+	return false
+}
+
+func (e TypeKind) String() string {
+	return string(e)
+}
+
+func (e *TypeKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TypeKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TypeKind", str)
+	}
+	return nil
+}
+
+func (e TypeKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

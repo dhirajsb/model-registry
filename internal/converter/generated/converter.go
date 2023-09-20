@@ -7,6 +7,7 @@ import (
 	converter "github.com/opendatahub-io/model-registry/internal/converter"
 	proto "github.com/opendatahub-io/model-registry/internal/ml_metadata/proto"
 	db "github.com/opendatahub-io/model-registry/internal/model/db"
+	graph "github.com/opendatahub-io/model-registry/internal/model/graph"
 )
 
 type GRPCConverterImpl struct{}
@@ -406,4 +407,3266 @@ func (c *GRPCConverterImpl) ConvertToExecution(source *db.Execution) (*proto.Exe
 		pProtoExecution = &protoExecution
 	}
 	return pProtoExecution, nil
+}
+
+type GraphConverterImpl struct{}
+
+func (c *GraphConverterImpl) ConvertArtifact(source *graph.Artifact) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *GraphConverterImpl) ConvertAssociation(source *graph.Association) (*db.Association, error) {
+	var pDbAssociation *db.Association
+	if source != nil {
+		var dbAssociation db.Association
+		xint64, err := converter.ConvertAssociationID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbAssociation.ID = xint64
+		xint642, err := converter.ConvertContextID((*source).ContextID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ContextID: %w", err)
+		}
+		dbAssociation.ContextID = xint642
+		xint643, err := converter.ConvertExecutionID((*source).ExecutionID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ExecutionID: %w", err)
+		}
+		dbAssociation.ExecutionID = xint643
+		pDbAssociation = &dbAssociation
+	}
+	return pDbAssociation, nil
+}
+func (c *GraphConverterImpl) ConvertAttribution(source *graph.Attribution) (*db.Attribution, error) {
+	var pDbAttribution *db.Attribution
+	if source != nil {
+		var dbAttribution db.Attribution
+		xint64, err := converter.ConvertAttributionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbAttribution.ID = xint64
+		xint642, err := converter.ConvertContextID((*source).ContextID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ContextID: %w", err)
+		}
+		dbAttribution.ContextID = xint642
+		xint643, err := converter.ConvertArtifactID((*source).ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ArtifactID: %w", err)
+		}
+		dbAttribution.ArtifactID = xint643
+		pDbAttribution = &dbAttribution
+	}
+	return pDbAttribution, nil
+}
+func (c *GraphConverterImpl) ConvertContext(source *graph.Context) (*db.Context, error) {
+	var pDbContext *db.Context
+	if source != nil {
+		var dbContext db.Context
+		xint64, err := converter.ConvertContextID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbContext.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbContext.TypeID = xint642
+		dbContext.Name = (*source).Name
+		var pString *string
+		if (*source).ExternalID != nil {
+			xstring := *(*source).ExternalID
+			pString = &xstring
+		}
+		dbContext.ExternalID = pString
+		dbContext.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbContext.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbContextPropertyList, err := converter.ConvertContextProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbContext.Properties = dbContextPropertyList
+		pDbContext = &dbContext
+	}
+	return pDbContext, nil
+}
+func (c *GraphConverterImpl) ConvertEvent(source *graph.Event) (*db.Event, error) {
+	var pDbEvent *db.Event
+	if source != nil {
+		var dbEvent db.Event
+		xint64, err := converter.ConvertEventID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbEvent.ID = xint64
+		xint642, err := converter.ConvertArtifactID((*source).ArtifactID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ArtifactID: %w", err)
+		}
+		dbEvent.ArtifactID = xint642
+		xint643, err := converter.ConvertExecutionID((*source).ExecutionID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ExecutionID: %w", err)
+		}
+		dbEvent.ExecutionID = xint643
+		dbEvent.Type = converter.ConvertEventType((*source).Type)
+		dbEvent.MillisecondsSinceEpoch = (*source).MillisecondsSinceEpoch
+		dbEventPathList, err := converter.ConvertEventPath((*source).Path)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field PathSteps: %w", err)
+		}
+		dbEvent.PathSteps = dbEventPathList
+		pDbEvent = &dbEvent
+	}
+	return pDbEvent, nil
+}
+func (c *GraphConverterImpl) ConvertExecution(source *graph.Execution) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *GraphConverterImpl) ConvertToArtifact(source *db.Artifact) (*graph.Artifact, error) {
+	var pGraphArtifact *graph.Artifact
+	if source != nil {
+		var graphArtifact graph.Artifact
+		graphArtifact.ID = converter.ConvertToArtifactID((*source).ID)
+		graphArtifact.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphArtifact.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphArtifact.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphArtifact.ExternalID = pString3
+		graphArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphArtifact.Properties = pGraphInstancePropertyList
+		pGraphArtifact = &graphArtifact
+	}
+	return pGraphArtifact, nil
+}
+func (c *GraphConverterImpl) ConvertToAssociation(source *db.Association) (*graph.Association, error) {
+	var pGraphAssociation *graph.Association
+	if source != nil {
+		var graphAssociation graph.Association
+		graphAssociation.ID = converter.ConvertToAssociationID((*source).ID)
+		graphAssociation.ContextID = converter.ConvertToContextID((*source).ContextID)
+		graphAssociation.ExecutionID = converter.ConvertToExecutionID((*source).ExecutionID)
+		pGraphAssociation = &graphAssociation
+	}
+	return pGraphAssociation, nil
+}
+func (c *GraphConverterImpl) ConvertToAttribution(source *db.Attribution) (*graph.Attribution, error) {
+	var pGraphAttribution *graph.Attribution
+	if source != nil {
+		var graphAttribution graph.Attribution
+		graphAttribution.ID = converter.ConvertToAttributionID((*source).ID)
+		graphAttribution.ContextID = converter.ConvertToContextID((*source).ContextID)
+		graphAttribution.ArtifactID = converter.ConvertToArtifactID((*source).ArtifactID)
+		pGraphAttribution = &graphAttribution
+	}
+	return pGraphAttribution, nil
+}
+func (c *GraphConverterImpl) ConvertToContext(source *db.Context) (*graph.Context, error) {
+	var pGraphContext *graph.Context
+	if source != nil {
+		var graphContext graph.Context
+		graphContext.ID = converter.ConvertToContextID((*source).ID)
+		graphContext.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		graphContext.Name = (*source).Name
+		var pString *string
+		if (*source).ExternalID != nil {
+			xstring := *(*source).ExternalID
+			pString = &xstring
+		}
+		graphContext.ExternalID = pString
+		graphContext.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphContext.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToContextProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphContext.Properties = pGraphInstancePropertyList
+		pGraphContext = &graphContext
+	}
+	return pGraphContext, nil
+}
+func (c *GraphConverterImpl) ConvertToEvent(source *db.Event) (*graph.Event, error) {
+	var pGraphEvent *graph.Event
+	if source != nil {
+		var graphEvent graph.Event
+		graphEvent.ID = converter.ConvertToEventID((*source).ID)
+		graphEvent.ArtifactID = converter.ConvertToArtifactID((*source).ArtifactID)
+		graphEvent.ExecutionID = converter.ConvertToExecutionID((*source).ExecutionID)
+		graphEvent.Type = converter.ConvertToEventType((*source).Type)
+		graphEventStepList, err := converter.ConvertToEventPath((*source).PathSteps)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Path: %w", err)
+		}
+		graphEvent.Path = graphEventStepList
+		graphEvent.MillisecondsSinceEpoch = (*source).MillisecondsSinceEpoch
+		pGraphEvent = &graphEvent
+	}
+	return pGraphEvent, nil
+}
+func (c *GraphConverterImpl) ConvertToExecution(source *db.Execution) (*graph.Execution, error) {
+	var pGraphExecution *graph.Execution
+	if source != nil {
+		var graphExecution graph.Execution
+		graphExecution.ID = converter.ConvertToExecutionID((*source).ID)
+		graphExecution.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphExecution.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphExecution.ExternalID = pString2
+		graphExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphExecution.Properties = pGraphInstancePropertyList
+		pGraphExecution = &graphExecution
+	}
+	return pGraphExecution, nil
+}
+
+type MlMetadataDelegateConverterImpl struct{}
+
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdDataset(source *graph.MlmdDataset) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdDeploy(source *graph.MlmdDeploy) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdEvaluate(source *graph.MlmdEvaluate) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdMetrics(source *graph.MlmdMetrics) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdModel(source *graph.MlmdModel) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdProcess(source *graph.MlmdProcess) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdStatistics(source *graph.MlmdStatistics) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdTrain(source *graph.MlmdTrain) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertMlmdTransform(source *graph.MlmdTransform) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdDataset(source *db.Artifact) (*graph.MlmdDataset, error) {
+	var pGraphMlmdDataset *graph.MlmdDataset
+	if source != nil {
+		var graphMlmdDataset graph.MlmdDataset
+		graphMlmdDataset.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlmdDataset.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlmdDataset.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlmdDataset.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlmdDataset.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlmdDataset.ExternalID = pString3
+		graphMlmdDataset.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdDataset.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdDataset.Properties = pGraphInstancePropertyList
+		pGraphMlmdDataset = &graphMlmdDataset
+	}
+	return pGraphMlmdDataset, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdDeploy(source *db.Execution) (*graph.MlmdDeploy, error) {
+	var pGraphMlmdDeploy *graph.MlmdDeploy
+	if source != nil {
+		var graphMlmdDeploy graph.MlmdDeploy
+		graphMlmdDeploy.ID = converter.ConvertToExecutionID((*source).ID)
+		graphMlmdDeploy.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphMlmdDeploy.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphMlmdDeploy.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphMlmdDeploy.ExternalID = pString2
+		graphMlmdDeploy.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdDeploy.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdDeploy.Properties = pGraphInstancePropertyList
+		pGraphMlmdDeploy = &graphMlmdDeploy
+	}
+	return pGraphMlmdDeploy, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdEvaluate(source *db.Execution) (*graph.MlmdEvaluate, error) {
+	var pGraphMlmdEvaluate *graph.MlmdEvaluate
+	if source != nil {
+		var graphMlmdEvaluate graph.MlmdEvaluate
+		graphMlmdEvaluate.ID = converter.ConvertToExecutionID((*source).ID)
+		graphMlmdEvaluate.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphMlmdEvaluate.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphMlmdEvaluate.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphMlmdEvaluate.ExternalID = pString2
+		graphMlmdEvaluate.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdEvaluate.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdEvaluate.Properties = pGraphInstancePropertyList
+		pGraphMlmdEvaluate = &graphMlmdEvaluate
+	}
+	return pGraphMlmdEvaluate, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdMetrics(source *db.Artifact) (*graph.MlmdMetrics, error) {
+	var pGraphMlmdMetrics *graph.MlmdMetrics
+	if source != nil {
+		var graphMlmdMetrics graph.MlmdMetrics
+		graphMlmdMetrics.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlmdMetrics.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlmdMetrics.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlmdMetrics.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlmdMetrics.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlmdMetrics.ExternalID = pString3
+		graphMlmdMetrics.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdMetrics.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdMetrics.Properties = pGraphInstancePropertyList
+		pGraphMlmdMetrics = &graphMlmdMetrics
+	}
+	return pGraphMlmdMetrics, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdModel(source *db.Artifact) (*graph.MlmdModel, error) {
+	var pGraphMlmdModel *graph.MlmdModel
+	if source != nil {
+		var graphMlmdModel graph.MlmdModel
+		graphMlmdModel.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlmdModel.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlmdModel.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlmdModel.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlmdModel.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlmdModel.ExternalID = pString3
+		graphMlmdModel.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdModel.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdModel.Properties = pGraphInstancePropertyList
+		pGraphMlmdModel = &graphMlmdModel
+	}
+	return pGraphMlmdModel, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdProcess(source *db.Execution) (*graph.MlmdProcess, error) {
+	var pGraphMlmdProcess *graph.MlmdProcess
+	if source != nil {
+		var graphMlmdProcess graph.MlmdProcess
+		graphMlmdProcess.ID = converter.ConvertToExecutionID((*source).ID)
+		graphMlmdProcess.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphMlmdProcess.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphMlmdProcess.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphMlmdProcess.ExternalID = pString2
+		graphMlmdProcess.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdProcess.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdProcess.Properties = pGraphInstancePropertyList
+		pGraphMlmdProcess = &graphMlmdProcess
+	}
+	return pGraphMlmdProcess, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdStatistics(source *db.Artifact) (*graph.MlmdStatistics, error) {
+	var pGraphMlmdStatistics *graph.MlmdStatistics
+	if source != nil {
+		var graphMlmdStatistics graph.MlmdStatistics
+		graphMlmdStatistics.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlmdStatistics.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlmdStatistics.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlmdStatistics.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlmdStatistics.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlmdStatistics.ExternalID = pString3
+		graphMlmdStatistics.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdStatistics.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdStatistics.Properties = pGraphInstancePropertyList
+		pGraphMlmdStatistics = &graphMlmdStatistics
+	}
+	return pGraphMlmdStatistics, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdTrain(source *db.Execution) (*graph.MlmdTrain, error) {
+	var pGraphMlmdTrain *graph.MlmdTrain
+	if source != nil {
+		var graphMlmdTrain graph.MlmdTrain
+		graphMlmdTrain.ID = converter.ConvertToExecutionID((*source).ID)
+		graphMlmdTrain.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphMlmdTrain.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphMlmdTrain.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphMlmdTrain.ExternalID = pString2
+		graphMlmdTrain.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdTrain.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdTrain.Properties = pGraphInstancePropertyList
+		pGraphMlmdTrain = &graphMlmdTrain
+	}
+	return pGraphMlmdTrain, nil
+}
+func (c *MlMetadataDelegateConverterImpl) ConvertToMlmdTransform(source *db.Execution) (*graph.MlmdTransform, error) {
+	var pGraphMlmdTransform *graph.MlmdTransform
+	if source != nil {
+		var graphMlmdTransform graph.MlmdTransform
+		graphMlmdTransform.ID = converter.ConvertToExecutionID((*source).ID)
+		graphMlmdTransform.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphMlmdTransform.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphMlmdTransform.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphMlmdTransform.ExternalID = pString2
+		graphMlmdTransform.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlmdTransform.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlmdTransform.Properties = pGraphInstancePropertyList
+		pGraphMlmdTransform = &graphMlmdTransform
+	}
+	return pGraphMlmdTransform, nil
+}
+
+type MlschemaMetadataDelegateConverterImpl struct{}
+
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaAlgorithm(source *graph.MlschemaAlgorithm) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaData(source *graph.MlschemaData) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaDataCharacteristic(source *graph.MlschemaDataCharacteristic) (*db.Context, error) {
+	var pDbContext *db.Context
+	if source != nil {
+		var dbContext db.Context
+		xint64, err := converter.ConvertContextID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbContext.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbContext.TypeID = xint642
+		dbContext.Name = (*source).Name
+		var pString *string
+		if (*source).ExternalID != nil {
+			xstring := *(*source).ExternalID
+			pString = &xstring
+		}
+		dbContext.ExternalID = pString
+		dbContext.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbContext.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbContextPropertyList, err := converter.ConvertContextProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbContext.Properties = dbContextPropertyList
+		pDbContext = &dbContext
+	}
+	return pDbContext, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaDataSet(source *graph.MlschemaDataSet) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaDatasetCharacteristic(source *graph.MlschemaDatasetCharacteristic) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaEvaluationMeasure(source *graph.MlschemaEvaluationMeasure) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaEvaluationProcedure(source *graph.MlschemaEvaluationProcedure) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaEvaluationSpecification(source *graph.MlschemaEvaluationSpecification) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaExperiment(source *graph.MlschemaExperiment) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaFeature(source *graph.MlschemaFeature) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaFeatureCharacteristic(source *graph.MlschemaFeatureCharacteristic) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaHyperParameter(source *graph.MlschemaHyperParameter) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaHyperParameterSetting(source *graph.MlschemaHyperParameterSetting) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaImplementation(source *graph.MlschemaImplementation) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaImplementationCharacteristic(source *graph.MlschemaImplementationCharacteristic) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaModel(source *graph.MlschemaModel) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaModelEvaluation(source *graph.MlschemaModelEvaluation) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaModelVersion(source *graph.MlschemaModelVersion) (*db.Context, error) {
+	var pDbContext *db.Context
+	if source != nil {
+		var dbContext db.Context
+		xint64, err := converter.ConvertContextID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbContext.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbContext.TypeID = xint642
+		dbContext.Name = (*source).Name
+		var pString *string
+		if (*source).ExternalID != nil {
+			xstring := *(*source).ExternalID
+			pString = &xstring
+		}
+		dbContext.ExternalID = pString
+		dbContext.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbContext.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbContextPropertyList, err := converter.ConvertContextProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbContext.Properties = dbContextPropertyList
+		pDbContext = &dbContext
+	}
+	return pDbContext, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaRegisteredModel(source *graph.MlschemaRegisteredModel) (*db.Context, error) {
+	var pDbContext *db.Context
+	if source != nil {
+		var dbContext db.Context
+		xint64, err := converter.ConvertContextID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbContext.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbContext.TypeID = xint642
+		dbContext.Name = (*source).Name
+		var pString *string
+		if (*source).ExternalID != nil {
+			xstring := *(*source).ExternalID
+			pString = &xstring
+		}
+		dbContext.ExternalID = pString
+		dbContext.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbContext.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbContextPropertyList, err := converter.ConvertContextProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbContext.Properties = dbContextPropertyList
+		pDbContext = &dbContext
+	}
+	return pDbContext, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaRun(source *graph.MlschemaRun) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaSoftware(source *graph.MlschemaSoftware) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaStudy(source *graph.MlschemaStudy) (*db.Execution, error) {
+	var pDbExecution *db.Execution
+	if source != nil {
+		var dbExecution db.Execution
+		xint64, err := converter.ConvertExecutionID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbExecution.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbExecution.TypeID = xint642
+		var pInt8 *int8
+		if (*source).LastKnownState != nil {
+			xint8 := converter.ConvertExecutionState(*(*source).LastKnownState)
+			pInt8 = &xint8
+		}
+		dbExecution.LastKnownState = pInt8
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		dbExecution.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		dbExecution.ExternalID = pString2
+		dbExecution.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbExecution.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbExecutionPropertyList, err := converter.ConvertExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbExecution.Properties = dbExecutionPropertyList
+		pDbExecution = &dbExecution
+	}
+	return pDbExecution, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertMlschemaTask(source *graph.MlschemaTask) (*db.Artifact, error) {
+	var pDbArtifact *db.Artifact
+	if source != nil {
+		var dbArtifact db.Artifact
+		xint64, err := converter.ConvertArtifactID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbArtifact.ID = xint64
+		xint642, err := converter.ConvertTypeID((*source).TypeID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field TypeID: %w", err)
+		}
+		dbArtifact.TypeID = xint642
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		dbArtifact.URI = pString
+		var pInt8 *int8
+		if (*source).State != nil {
+			xint8 := converter.ConvertArtifactState(*(*source).State)
+			pInt8 = &xint8
+		}
+		dbArtifact.State = pInt8
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		dbArtifact.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbArtifact.ExternalID = pString3
+		dbArtifact.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		dbArtifact.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		dbArtifactPropertyList, err := converter.ConvertArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbArtifact.Properties = dbArtifactPropertyList
+		pDbArtifact = &dbArtifact
+	}
+	return pDbArtifact, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaAlgorithm(source *db.Artifact) (*graph.MlschemaAlgorithm, error) {
+	var pGraphMlschemaAlgorithm *graph.MlschemaAlgorithm
+	if source != nil {
+		var graphMlschemaAlgorithm graph.MlschemaAlgorithm
+		graphMlschemaAlgorithm.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaAlgorithm.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaAlgorithm.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaAlgorithm.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaAlgorithm.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaAlgorithm.ExternalID = pString3
+		graphMlschemaAlgorithm.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaAlgorithm.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaAlgorithm.Properties = pGraphInstancePropertyList
+		pGraphMlschemaAlgorithm = &graphMlschemaAlgorithm
+	}
+	return pGraphMlschemaAlgorithm, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaData(source *db.Artifact) (*graph.MlschemaData, error) {
+	var pGraphMlschemaData *graph.MlschemaData
+	if source != nil {
+		var graphMlschemaData graph.MlschemaData
+		graphMlschemaData.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaData.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaData.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaData.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaData.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaData.ExternalID = pString3
+		graphMlschemaData.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaData.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaData.Properties = pGraphInstancePropertyList
+		pGraphMlschemaData = &graphMlschemaData
+	}
+	return pGraphMlschemaData, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaDataCharacteristic(source *db.Context) (*graph.MlschemaDataCharacteristic, error) {
+	var pGraphMlschemaDataCharacteristic *graph.MlschemaDataCharacteristic
+	if source != nil {
+		var graphMlschemaDataCharacteristic graph.MlschemaDataCharacteristic
+		graphMlschemaDataCharacteristic.ID = converter.ConvertToContextID((*source).ID)
+		graphMlschemaDataCharacteristic.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		graphMlschemaDataCharacteristic.Name = (*source).Name
+		var pString *string
+		if (*source).ExternalID != nil {
+			xstring := *(*source).ExternalID
+			pString = &xstring
+		}
+		graphMlschemaDataCharacteristic.ExternalID = pString
+		graphMlschemaDataCharacteristic.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaDataCharacteristic.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToContextProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaDataCharacteristic.Properties = pGraphInstancePropertyList
+		pGraphMlschemaDataCharacteristic = &graphMlschemaDataCharacteristic
+	}
+	return pGraphMlschemaDataCharacteristic, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaDataSet(source *db.Artifact) (*graph.MlschemaDataSet, error) {
+	var pGraphMlschemaDataSet *graph.MlschemaDataSet
+	if source != nil {
+		var graphMlschemaDataSet graph.MlschemaDataSet
+		graphMlschemaDataSet.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaDataSet.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaDataSet.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaDataSet.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaDataSet.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaDataSet.ExternalID = pString3
+		graphMlschemaDataSet.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaDataSet.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaDataSet.Properties = pGraphInstancePropertyList
+		pGraphMlschemaDataSet = &graphMlschemaDataSet
+	}
+	return pGraphMlschemaDataSet, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaDatasetCharacteristic(source *db.Artifact) (*graph.MlschemaDatasetCharacteristic, error) {
+	var pGraphMlschemaDatasetCharacteristic *graph.MlschemaDatasetCharacteristic
+	if source != nil {
+		var graphMlschemaDatasetCharacteristic graph.MlschemaDatasetCharacteristic
+		graphMlschemaDatasetCharacteristic.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaDatasetCharacteristic.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaDatasetCharacteristic.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaDatasetCharacteristic.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaDatasetCharacteristic.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaDatasetCharacteristic.ExternalID = pString3
+		graphMlschemaDatasetCharacteristic.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaDatasetCharacteristic.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaDatasetCharacteristic.Properties = pGraphInstancePropertyList
+		pGraphMlschemaDatasetCharacteristic = &graphMlschemaDatasetCharacteristic
+	}
+	return pGraphMlschemaDatasetCharacteristic, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaEvaluationMeasure(source *db.Artifact) (*graph.MlschemaEvaluationMeasure, error) {
+	var pGraphMlschemaEvaluationMeasure *graph.MlschemaEvaluationMeasure
+	if source != nil {
+		var graphMlschemaEvaluationMeasure graph.MlschemaEvaluationMeasure
+		graphMlschemaEvaluationMeasure.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaEvaluationMeasure.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaEvaluationMeasure.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaEvaluationMeasure.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaEvaluationMeasure.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaEvaluationMeasure.ExternalID = pString3
+		graphMlschemaEvaluationMeasure.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaEvaluationMeasure.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaEvaluationMeasure.Properties = pGraphInstancePropertyList
+		pGraphMlschemaEvaluationMeasure = &graphMlschemaEvaluationMeasure
+	}
+	return pGraphMlschemaEvaluationMeasure, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaEvaluationProcedure(source *db.Artifact) (*graph.MlschemaEvaluationProcedure, error) {
+	var pGraphMlschemaEvaluationProcedure *graph.MlschemaEvaluationProcedure
+	if source != nil {
+		var graphMlschemaEvaluationProcedure graph.MlschemaEvaluationProcedure
+		graphMlschemaEvaluationProcedure.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaEvaluationProcedure.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaEvaluationProcedure.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaEvaluationProcedure.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaEvaluationProcedure.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaEvaluationProcedure.ExternalID = pString3
+		graphMlschemaEvaluationProcedure.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaEvaluationProcedure.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaEvaluationProcedure.Properties = pGraphInstancePropertyList
+		pGraphMlschemaEvaluationProcedure = &graphMlschemaEvaluationProcedure
+	}
+	return pGraphMlschemaEvaluationProcedure, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaEvaluationSpecification(source *db.Artifact) (*graph.MlschemaEvaluationSpecification, error) {
+	var pGraphMlschemaEvaluationSpecification *graph.MlschemaEvaluationSpecification
+	if source != nil {
+		var graphMlschemaEvaluationSpecification graph.MlschemaEvaluationSpecification
+		graphMlschemaEvaluationSpecification.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaEvaluationSpecification.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaEvaluationSpecification.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaEvaluationSpecification.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaEvaluationSpecification.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaEvaluationSpecification.ExternalID = pString3
+		graphMlschemaEvaluationSpecification.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaEvaluationSpecification.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaEvaluationSpecification.Properties = pGraphInstancePropertyList
+		pGraphMlschemaEvaluationSpecification = &graphMlschemaEvaluationSpecification
+	}
+	return pGraphMlschemaEvaluationSpecification, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaExperiment(source *db.Execution) (*graph.MlschemaExperiment, error) {
+	var pGraphMlschemaExperiment *graph.MlschemaExperiment
+	if source != nil {
+		var graphMlschemaExperiment graph.MlschemaExperiment
+		graphMlschemaExperiment.ID = converter.ConvertToExecutionID((*source).ID)
+		graphMlschemaExperiment.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphMlschemaExperiment.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphMlschemaExperiment.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphMlschemaExperiment.ExternalID = pString2
+		graphMlschemaExperiment.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaExperiment.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaExperiment.Properties = pGraphInstancePropertyList
+		pGraphMlschemaExperiment = &graphMlschemaExperiment
+	}
+	return pGraphMlschemaExperiment, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaFeature(source *db.Artifact) (*graph.MlschemaFeature, error) {
+	var pGraphMlschemaFeature *graph.MlschemaFeature
+	if source != nil {
+		var graphMlschemaFeature graph.MlschemaFeature
+		graphMlschemaFeature.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaFeature.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaFeature.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaFeature.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaFeature.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaFeature.ExternalID = pString3
+		graphMlschemaFeature.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaFeature.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaFeature.Properties = pGraphInstancePropertyList
+		pGraphMlschemaFeature = &graphMlschemaFeature
+	}
+	return pGraphMlschemaFeature, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaFeatureCharacteristic(source *db.Artifact) (*graph.MlschemaFeatureCharacteristic, error) {
+	var pGraphMlschemaFeatureCharacteristic *graph.MlschemaFeatureCharacteristic
+	if source != nil {
+		var graphMlschemaFeatureCharacteristic graph.MlschemaFeatureCharacteristic
+		graphMlschemaFeatureCharacteristic.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaFeatureCharacteristic.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaFeatureCharacteristic.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaFeatureCharacteristic.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaFeatureCharacteristic.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaFeatureCharacteristic.ExternalID = pString3
+		graphMlschemaFeatureCharacteristic.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaFeatureCharacteristic.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaFeatureCharacteristic.Properties = pGraphInstancePropertyList
+		pGraphMlschemaFeatureCharacteristic = &graphMlschemaFeatureCharacteristic
+	}
+	return pGraphMlschemaFeatureCharacteristic, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaHyperParameter(source *db.Artifact) (*graph.MlschemaHyperParameter, error) {
+	var pGraphMlschemaHyperParameter *graph.MlschemaHyperParameter
+	if source != nil {
+		var graphMlschemaHyperParameter graph.MlschemaHyperParameter
+		graphMlschemaHyperParameter.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaHyperParameter.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaHyperParameter.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaHyperParameter.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaHyperParameter.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaHyperParameter.ExternalID = pString3
+		graphMlschemaHyperParameter.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaHyperParameter.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaHyperParameter.Properties = pGraphInstancePropertyList
+		pGraphMlschemaHyperParameter = &graphMlschemaHyperParameter
+	}
+	return pGraphMlschemaHyperParameter, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaHyperParameterSetting(source *db.Artifact) (*graph.MlschemaHyperParameterSetting, error) {
+	var pGraphMlschemaHyperParameterSetting *graph.MlschemaHyperParameterSetting
+	if source != nil {
+		var graphMlschemaHyperParameterSetting graph.MlschemaHyperParameterSetting
+		graphMlschemaHyperParameterSetting.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaHyperParameterSetting.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaHyperParameterSetting.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaHyperParameterSetting.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaHyperParameterSetting.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaHyperParameterSetting.ExternalID = pString3
+		graphMlschemaHyperParameterSetting.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaHyperParameterSetting.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaHyperParameterSetting.Properties = pGraphInstancePropertyList
+		pGraphMlschemaHyperParameterSetting = &graphMlschemaHyperParameterSetting
+	}
+	return pGraphMlschemaHyperParameterSetting, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaImplementation(source *db.Artifact) (*graph.MlschemaImplementation, error) {
+	var pGraphMlschemaImplementation *graph.MlschemaImplementation
+	if source != nil {
+		var graphMlschemaImplementation graph.MlschemaImplementation
+		graphMlschemaImplementation.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaImplementation.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaImplementation.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaImplementation.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaImplementation.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaImplementation.ExternalID = pString3
+		graphMlschemaImplementation.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaImplementation.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaImplementation.Properties = pGraphInstancePropertyList
+		pGraphMlschemaImplementation = &graphMlschemaImplementation
+	}
+	return pGraphMlschemaImplementation, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaImplementationCharacteristic(source *db.Artifact) (*graph.MlschemaImplementationCharacteristic, error) {
+	var pGraphMlschemaImplementationCharacteristic *graph.MlschemaImplementationCharacteristic
+	if source != nil {
+		var graphMlschemaImplementationCharacteristic graph.MlschemaImplementationCharacteristic
+		graphMlschemaImplementationCharacteristic.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaImplementationCharacteristic.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaImplementationCharacteristic.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaImplementationCharacteristic.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaImplementationCharacteristic.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaImplementationCharacteristic.ExternalID = pString3
+		graphMlschemaImplementationCharacteristic.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaImplementationCharacteristic.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaImplementationCharacteristic.Properties = pGraphInstancePropertyList
+		pGraphMlschemaImplementationCharacteristic = &graphMlschemaImplementationCharacteristic
+	}
+	return pGraphMlschemaImplementationCharacteristic, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaModel(source *db.Artifact) (*graph.MlschemaModel, error) {
+	var pGraphMlschemaModel *graph.MlschemaModel
+	if source != nil {
+		var graphMlschemaModel graph.MlschemaModel
+		graphMlschemaModel.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaModel.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaModel.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaModel.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaModel.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaModel.ExternalID = pString3
+		graphMlschemaModel.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaModel.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaModel.Properties = pGraphInstancePropertyList
+		pGraphMlschemaModel = &graphMlschemaModel
+	}
+	return pGraphMlschemaModel, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaModelEvaluation(source *db.Artifact) (*graph.MlschemaModelEvaluation, error) {
+	var pGraphMlschemaModelEvaluation *graph.MlschemaModelEvaluation
+	if source != nil {
+		var graphMlschemaModelEvaluation graph.MlschemaModelEvaluation
+		graphMlschemaModelEvaluation.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaModelEvaluation.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaModelEvaluation.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaModelEvaluation.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaModelEvaluation.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaModelEvaluation.ExternalID = pString3
+		graphMlschemaModelEvaluation.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaModelEvaluation.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaModelEvaluation.Properties = pGraphInstancePropertyList
+		pGraphMlschemaModelEvaluation = &graphMlschemaModelEvaluation
+	}
+	return pGraphMlschemaModelEvaluation, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaModelVersion(source *db.Context) (*graph.MlschemaModelVersion, error) {
+	var pGraphMlschemaModelVersion *graph.MlschemaModelVersion
+	if source != nil {
+		var graphMlschemaModelVersion graph.MlschemaModelVersion
+		graphMlschemaModelVersion.ID = converter.ConvertToContextID((*source).ID)
+		graphMlschemaModelVersion.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		graphMlschemaModelVersion.Name = (*source).Name
+		var pString *string
+		if (*source).ExternalID != nil {
+			xstring := *(*source).ExternalID
+			pString = &xstring
+		}
+		graphMlschemaModelVersion.ExternalID = pString
+		graphMlschemaModelVersion.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaModelVersion.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToContextProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaModelVersion.Properties = pGraphInstancePropertyList
+		pGraphMlschemaModelVersion = &graphMlschemaModelVersion
+	}
+	return pGraphMlschemaModelVersion, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaRegisteredModel(source *db.Context) (*graph.MlschemaRegisteredModel, error) {
+	var pGraphMlschemaRegisteredModel *graph.MlschemaRegisteredModel
+	if source != nil {
+		var graphMlschemaRegisteredModel graph.MlschemaRegisteredModel
+		graphMlschemaRegisteredModel.ID = converter.ConvertToContextID((*source).ID)
+		graphMlschemaRegisteredModel.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		graphMlschemaRegisteredModel.Name = (*source).Name
+		var pString *string
+		if (*source).ExternalID != nil {
+			xstring := *(*source).ExternalID
+			pString = &xstring
+		}
+		graphMlschemaRegisteredModel.ExternalID = pString
+		graphMlschemaRegisteredModel.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaRegisteredModel.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToContextProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaRegisteredModel.Properties = pGraphInstancePropertyList
+		pGraphMlschemaRegisteredModel = &graphMlschemaRegisteredModel
+	}
+	return pGraphMlschemaRegisteredModel, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaRun(source *db.Execution) (*graph.MlschemaRun, error) {
+	var pGraphMlschemaRun *graph.MlschemaRun
+	if source != nil {
+		var graphMlschemaRun graph.MlschemaRun
+		graphMlschemaRun.ID = converter.ConvertToExecutionID((*source).ID)
+		graphMlschemaRun.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphMlschemaRun.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphMlschemaRun.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphMlschemaRun.ExternalID = pString2
+		graphMlschemaRun.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaRun.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaRun.Properties = pGraphInstancePropertyList
+		pGraphMlschemaRun = &graphMlschemaRun
+	}
+	return pGraphMlschemaRun, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaSoftware(source *db.Artifact) (*graph.MlschemaSoftware, error) {
+	var pGraphMlschemaSoftware *graph.MlschemaSoftware
+	if source != nil {
+		var graphMlschemaSoftware graph.MlschemaSoftware
+		graphMlschemaSoftware.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaSoftware.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaSoftware.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaSoftware.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaSoftware.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaSoftware.ExternalID = pString3
+		graphMlschemaSoftware.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaSoftware.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaSoftware.Properties = pGraphInstancePropertyList
+		pGraphMlschemaSoftware = &graphMlschemaSoftware
+	}
+	return pGraphMlschemaSoftware, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaStudy(source *db.Execution) (*graph.MlschemaStudy, error) {
+	var pGraphMlschemaStudy *graph.MlschemaStudy
+	if source != nil {
+		var graphMlschemaStudy graph.MlschemaStudy
+		graphMlschemaStudy.ID = converter.ConvertToExecutionID((*source).ID)
+		graphMlschemaStudy.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pGraphExecutionState *graph.ExecutionState
+		if (*source).LastKnownState != nil {
+			graphExecutionState := converter.ConvertToExecutionState(*(*source).LastKnownState)
+			pGraphExecutionState = &graphExecutionState
+		}
+		graphMlschemaStudy.LastKnownState = pGraphExecutionState
+		var pString *string
+		if (*source).Name != nil {
+			xstring := *(*source).Name
+			pString = &xstring
+		}
+		graphMlschemaStudy.Name = pString
+		var pString2 *string
+		if (*source).ExternalID != nil {
+			xstring2 := *(*source).ExternalID
+			pString2 = &xstring2
+		}
+		graphMlschemaStudy.ExternalID = pString2
+		graphMlschemaStudy.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaStudy.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToExecutionProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaStudy.Properties = pGraphInstancePropertyList
+		pGraphMlschemaStudy = &graphMlschemaStudy
+	}
+	return pGraphMlschemaStudy, nil
+}
+func (c *MlschemaMetadataDelegateConverterImpl) ConvertToMlschemaTask(source *db.Artifact) (*graph.MlschemaTask, error) {
+	var pGraphMlschemaTask *graph.MlschemaTask
+	if source != nil {
+		var graphMlschemaTask graph.MlschemaTask
+		graphMlschemaTask.ID = converter.ConvertToArtifactID((*source).ID)
+		graphMlschemaTask.TypeID = converter.ConvertToTypeID((*source).TypeID)
+		var pString *string
+		if (*source).URI != nil {
+			xstring := *(*source).URI
+			pString = &xstring
+		}
+		graphMlschemaTask.URI = pString
+		var pGraphArtifactState *graph.ArtifactState
+		if (*source).State != nil {
+			graphArtifactState := converter.ConvertToArtifactState(*(*source).State)
+			pGraphArtifactState = &graphArtifactState
+		}
+		graphMlschemaTask.State = pGraphArtifactState
+		var pString2 *string
+		if (*source).Name != nil {
+			xstring2 := *(*source).Name
+			pString2 = &xstring2
+		}
+		graphMlschemaTask.Name = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphMlschemaTask.ExternalID = pString3
+		graphMlschemaTask.CreateTimeSinceEpoch = (*source).CreateTimeSinceEpoch
+		graphMlschemaTask.LastUpdateTimeSinceEpoch = (*source).LastUpdateTimeSinceEpoch
+		pGraphInstancePropertyList, err := converter.ConvertToArtifactProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphMlschemaTask.Properties = pGraphInstancePropertyList
+		pGraphMlschemaTask = &graphMlschemaTask
+	}
+	return pGraphMlschemaTask, nil
+}
+
+type TypeConverterImpl struct{}
+
+func (c *TypeConverterImpl) ConvertArtifactType(source *graph.ArtifactType) (*db.Type, error) {
+	var pDbType *db.Type
+	if source != nil {
+		var dbType db.Type
+		xint64, err := converter.ConvertTypeID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbType.ID = xint64
+		dbType.Name = (*source).Name
+		var pString *string
+		if (*source).Version != nil {
+			xstring := *(*source).Version
+			pString = &xstring
+		}
+		dbType.Version = pString
+		dbType.TypeKind = converter.ConvertTypeKind((*source).TypeKind)
+		var pString2 *string
+		if (*source).Description != nil {
+			xstring2 := *(*source).Description
+			pString2 = &xstring2
+		}
+		dbType.Description = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbType.ExternalID = pString3
+		dbTypePropertyList, err := converter.ConvertTypeProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbType.Properties = dbTypePropertyList
+		pDbType = &dbType
+	}
+	return pDbType, nil
+}
+func (c *TypeConverterImpl) ConvertContextType(source *graph.ContextType) (*db.Type, error) {
+	var pDbType *db.Type
+	if source != nil {
+		var dbType db.Type
+		xint64, err := converter.ConvertTypeID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbType.ID = xint64
+		dbType.Name = (*source).Name
+		var pString *string
+		if (*source).Version != nil {
+			xstring := *(*source).Version
+			pString = &xstring
+		}
+		dbType.Version = pString
+		dbType.TypeKind = converter.ConvertTypeKind((*source).TypeKind)
+		var pString2 *string
+		if (*source).Description != nil {
+			xstring2 := *(*source).Description
+			pString2 = &xstring2
+		}
+		dbType.Description = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbType.ExternalID = pString3
+		dbTypePropertyList, err := converter.ConvertTypeProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbType.Properties = dbTypePropertyList
+		pDbType = &dbType
+	}
+	return pDbType, nil
+}
+func (c *TypeConverterImpl) ConvertExecutionType(source *graph.ExecutionType) (*db.Type, error) {
+	var pDbType *db.Type
+	if source != nil {
+		var dbType db.Type
+		xint64, err := converter.ConvertTypeID((*source).ID)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field ID: %w", err)
+		}
+		dbType.ID = xint64
+		dbType.Name = (*source).Name
+		var pString *string
+		if (*source).Version != nil {
+			xstring := *(*source).Version
+			pString = &xstring
+		}
+		dbType.Version = pString
+		dbType.TypeKind = converter.ConvertTypeKind((*source).TypeKind)
+		var pString2 *string
+		if (*source).Description != nil {
+			xstring2 := *(*source).Description
+			pString2 = &xstring2
+		}
+		dbType.Description = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		dbType.ExternalID = pString3
+		dbTypePropertyList, err := converter.ConvertTypeProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		dbType.Properties = dbTypePropertyList
+		pDbType = &dbType
+	}
+	return pDbType, nil
+}
+func (c *TypeConverterImpl) ConvertToArtifactType(source *db.Type) (*graph.ArtifactType, error) {
+	var pGraphArtifactType *graph.ArtifactType
+	if source != nil {
+		var graphArtifactType graph.ArtifactType
+		graphArtifactType.ID = converter.ConvertToTypeID((*source).ID)
+		graphArtifactType.Name = (*source).Name
+		var pString *string
+		if (*source).Version != nil {
+			xstring := *(*source).Version
+			pString = &xstring
+		}
+		graphArtifactType.Version = pString
+		graphArtifactType.TypeKind = converter.ConvertToTypeKind((*source).TypeKind)
+		var pString2 *string
+		if (*source).Description != nil {
+			xstring2 := *(*source).Description
+			pString2 = &xstring2
+		}
+		graphArtifactType.Description = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphArtifactType.ExternalID = pString3
+		pGraphTypePropertyList, err := converter.ConvertToTypeProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphArtifactType.Properties = pGraphTypePropertyList
+		pGraphArtifactType = &graphArtifactType
+	}
+	return pGraphArtifactType, nil
+}
+func (c *TypeConverterImpl) ConvertToContextType(source *db.Type) (*graph.ContextType, error) {
+	var pGraphContextType *graph.ContextType
+	if source != nil {
+		var graphContextType graph.ContextType
+		graphContextType.ID = converter.ConvertToTypeID((*source).ID)
+		graphContextType.Name = (*source).Name
+		var pString *string
+		if (*source).Version != nil {
+			xstring := *(*source).Version
+			pString = &xstring
+		}
+		graphContextType.Version = pString
+		graphContextType.TypeKind = converter.ConvertToTypeKind((*source).TypeKind)
+		var pString2 *string
+		if (*source).Description != nil {
+			xstring2 := *(*source).Description
+			pString2 = &xstring2
+		}
+		graphContextType.Description = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphContextType.ExternalID = pString3
+		pGraphTypePropertyList, err := converter.ConvertToTypeProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphContextType.Properties = pGraphTypePropertyList
+		pGraphContextType = &graphContextType
+	}
+	return pGraphContextType, nil
+}
+func (c *TypeConverterImpl) ConvertToExecutionType(source *db.Type) (*graph.ExecutionType, error) {
+	var pGraphExecutionType *graph.ExecutionType
+	if source != nil {
+		var graphExecutionType graph.ExecutionType
+		graphExecutionType.ID = converter.ConvertToTypeID((*source).ID)
+		graphExecutionType.Name = (*source).Name
+		var pString *string
+		if (*source).Version != nil {
+			xstring := *(*source).Version
+			pString = &xstring
+		}
+		graphExecutionType.Version = pString
+		graphExecutionType.TypeKind = converter.ConvertToTypeKind((*source).TypeKind)
+		var pString2 *string
+		if (*source).Description != nil {
+			xstring2 := *(*source).Description
+			pString2 = &xstring2
+		}
+		graphExecutionType.Description = pString2
+		var pString3 *string
+		if (*source).ExternalID != nil {
+			xstring3 := *(*source).ExternalID
+			pString3 = &xstring3
+		}
+		graphExecutionType.ExternalID = pString3
+		var pString4 *string
+		if (*source).InputType != nil {
+			xstring4 := *(*source).InputType
+			pString4 = &xstring4
+		}
+		graphExecutionType.InputType = pString4
+		var pString5 *string
+		if (*source).OutputType != nil {
+			xstring5 := *(*source).OutputType
+			pString5 = &xstring5
+		}
+		graphExecutionType.OutputType = pString5
+		pGraphTypePropertyList, err := converter.ConvertToTypeProperties((*source).Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error setting field Properties: %w", err)
+		}
+		graphExecutionType.Properties = pGraphTypePropertyList
+		pGraphExecutionType = &graphExecutionType
+	}
+	return pGraphExecutionType, nil
 }

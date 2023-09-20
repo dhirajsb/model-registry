@@ -11,11 +11,16 @@ import (
 	"github.com/opendatahub-io/model-registry/internal/model/graph"
 )
 
+// CreateArtifactType is the resolver for the createArtifactType field.
+func (r *mutationResolver) CreateArtifactType(ctx context.Context, input *graph.ArtifactTypeInput) (*graph.ArtifactType, error) {
+	panic(fmt.Errorf("not implemented: CreateArtifactType - createArtifactType"))
+}
+
 // Types is the resolver for the types field.
 func (r *queryResolver) Types(ctx context.Context, filter *graph.TypeFilter) ([]graph.Type, error) {
 	//panic(fmt.Errorf("not implemented: Types - types"))
 	id := "1"
-	return []graph.Type{graph.ArtifactType{ID: &id, Name: "TestType"}}, nil
+	return []graph.Type{graph.ArtifactType{ID: id, Name: "TestType"}}, nil
 }
 
 // ArtifactTypes is the resolver for the artifactTypes field.
@@ -34,18 +39,19 @@ func (r *queryResolver) ExecutionTypes(ctx context.Context, filter *graph.TypeFi
 }
 
 // Artifacts is the resolver for the artifacts field.
-func (r *queryResolver) Artifacts(ctx context.Context, filter *graph.InstanceFilter) ([]*graph.Artifact, error) {
+func (r *queryResolver) Artifacts(ctx context.Context, filter *graph.InstanceFilter) ([]graph.ArtifactInterface, error) {
 	id := "1"
-	return []*graph.Artifact{{ID: &id, Name: "TestArtifact", TypeID: id}}, nil
+	name := "TestArtifact"
+	return []graph.ArtifactInterface{graph.Artifact{ID: id, Name: &name, TypeID: id}}, nil
 }
 
 // Contexts is the resolver for the contexts field.
-func (r *queryResolver) Contexts(ctx context.Context, filter *graph.InstanceFilter) ([]*graph.Context, error) {
+func (r *queryResolver) Contexts(ctx context.Context, filter *graph.InstanceFilter) ([]graph.ContextInterface, error) {
 	panic(fmt.Errorf("not implemented: Contexts - contexts"))
 }
 
 // Executions is the resolver for the executions field.
-func (r *queryResolver) Executions(ctx context.Context, filter *graph.InstanceFilter) ([]*graph.Execution, error) {
+func (r *queryResolver) Executions(ctx context.Context, filter *graph.InstanceFilter) ([]graph.ExecutionInterface, error) {
 	panic(fmt.Errorf("not implemented: Executions - executions"))
 }
 
@@ -54,12 +60,11 @@ func (r *queryResolver) Events(ctx context.Context) ([]*graph.Event, error) {
 	panic(fmt.Errorf("not implemented: Events - events"))
 }
 
-// MlmdDataset is the resolver for the mlmdDataset field.
-func (r *queryResolver) MlmdDataset(ctx context.Context, filter *graph.InstanceFilter) ([]*graph.MlmdDataset, error) {
-	panic(fmt.Errorf("not implemented: MlmdDataset - mlmdDataset"))
-}
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

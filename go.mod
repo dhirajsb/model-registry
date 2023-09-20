@@ -4,8 +4,10 @@ go 1.19
 
 require (
 	github.com/99designs/gqlgen v0.17.36
+	github.com/gertd/go-pluralize v0.2.1
 	github.com/golang/glog v1.1.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0
+	github.com/rogpeppe/go-internal v1.9.0
 	github.com/searKing/golang/tools/go-enum v1.2.97
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/cobra v1.7.0

@@ -17,9 +17,12 @@ type Query {
     artifactTypes(filter: TypeFilter): [ArtifactType!]
     contextTypes(filter: TypeFilter): [ContextType!]
     executionTypes(filter: TypeFilter): [ExecutionType!]
-    artifacts(filter: InstanceFilter): [Artifact!]
-    contexts(filter: InstanceFilter): [Context!]
-    executions(filter: InstanceFilter): [Execution!]
+    artifacts(filter: InstanceFilter): [ArtifactInterface!]
+    contexts(filter: InstanceFilter): [ContextInterface!]
+    executions(filter: InstanceFilter): [ExecutionInterface!]
     events: [Event!]
-    mlmdDataset(filter: InstanceFilter): [MlmdDataset!]
+}
+
+type Mutation {
+    createArtifactType(input: ArtifactTypeInput): ArtifactType!
 }

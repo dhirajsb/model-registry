@@ -1,0 +1,32 @@
+# types for ml-metadata library
+artifact-types:
+  - name: "mlmd.Dataset"
+    properties:
+      - name: "intProp"
+        type: INT
+      - name: "secondProp"
+        type: DOUBLE
+  - name: "mlmd.Model"
+    properties:
+      - name: "doubleProp"
+        type: DOUBLE
+  - name: "mlmd.Metrics"
+    properties:
+      - name: "stringProp"
+        type: STRING
+  - name: "mlmd.Statistics"
+    properties:
+      - name: "structProp"
+        type: STRUCT
+execution-types:
+  - name: "mlmd.Train"
+    properties:
+      - name: "protoProp"
+        type: PROTO
+  - name: "mlmd.Transform"
+    properties:
+      - name: "booleanProp"
+        type: BOOLEAN
+  - name: "mlmd.Process"
+  - name: "mlmd.Evaluate"
+  - name: "mlmd.Deploy"

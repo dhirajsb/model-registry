@@ -2,20 +2,23 @@ package library
 
 import (
 	"fmt"
+	"github.com/gertd/go-pluralize"
 	"github.com/golang/glog"
 	"gopkg.in/yaml.v3"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
-//go:generate go-enum -type=PropertyType
+//go:generate go-enum -type=PropertyValueType
 
-type PropertyType int32
+type PropertyValueType int32
 
 const (
-	UNKNOWN PropertyType = iota
+	UNKNOWN PropertyValueType = iota
 	INT
 	DOUBLE
 	STRING
@@ -25,11 +28,23 @@ const (
 )
 
 type MetadataType struct {
-	Name        *string                 `yaml:"name,omitempty"`
-	Version     *string                 `yaml:"version,omitempty"`
-	Description *string                 `yaml:"description,omitempty"`
-	ExternalId  *string                 `yaml:"external_id,omitempty"`
-	Properties  map[string]PropertyType `yaml:"properties,omitempty"`
+	Name             *string        `yaml:"name,omitempty"`
+	Version          *string        `yaml:"version,omitempty"`
+	Description      *string        `yaml:"description,omitempty"`
+	ExternalId       *string        `yaml:"external_id,omitempty"`
+	Properties       []PropertyType `yaml:"properties,omitempty"`
+	graphQLName      *string        `yaml:"-"`
+	graphQLQueryName *string        `yaml:"-"`
+}
+
+type PropertyType struct {
+	Name           string            `yaml:"name"`
+	Type           PropertyValueType `yaml:"type"`
+	Description    *string           `yaml:"description,omitempty"`
+	graphQLName    *string           `yaml:"-"`
+	goName         *string           `yaml:"-"`
+	graphQLType    *string           `yaml:"-"`
+	graphQLWrapper *string           `yaml:"-"`
 }
 
 type ArtifactType struct {
@@ -97,4 +112,127 @@ func LoadLibraries(dirs []string) (map[string]*MetadataLibrary, error) {
 func isYamlFile(path string) bool {
 	lowerPath := strings.ToLower(filepath.Ext(path))
 	return strings.HasSuffix(lowerPath, ".yaml") || strings.HasSuffix(lowerPath, ".yml")
+}
+func (t *MetadataType) GraphQLName() (string, error) {
+	if t.graphQLName == nil {
+		name, err := ToGraphQLIdentifier(*t.Name, true)
+		if err != nil {
+			return name, err
+		}
+		t.graphQLName = &name
+	}
+	return *t.graphQLName, nil
+}
+
+func ToGraphQLIdentifier(name string, capitalFirst bool) (string, error) {
+	r, size := utf8.DecodeRuneInString(name)
+	if r == utf8.RuneError {
+		return "", fmt.Errorf("unable to convert %s to GraphQL identifier", name)
+	}
+	result := strings.Builder{}
+	if capitalFirst {
+		result.WriteRune(unicode.ToUpper(r))
+	} else {
+		result.WriteRune(unicode.ToLower(r))
+	}
+	wordBreak := false
+	// copy the rest, skipping any non alphanumerics and '_'
+	_ = strings.Map(func(r rune) rune {
+		if unicode.IsLetter(r) || r == '_' || unicode.IsDigit(r) {
+			if wordBreak {
+				r = unicode.ToUpper(r)
+				wordBreak = false
+			}
+			result.WriteRune(r)
+		} else {
+			// word break at non alphanumeric and '_'
+			wordBreak = true
+		}
+		return r
+	}, (name)[size:])
+	return result.String(), nil
+}
+
+var client = pluralize.NewClient()
+
+func (t *MetadataType) GraphQLQueryName() (string, error) {
+	if t.graphQLQueryName == nil {
+		name, err := t.GraphQLName()
+		if err != nil {
+			return name, err
+		}
+		r, size := utf8.DecodeRuneInString(name)
+		name = string(unicode.ToLower(r)) + name[size:]
+		str := client.Plural(name)
+		t.graphQLQueryName = &str
+	}
+	return *t.graphQLQueryName, nil
+}
+
+func (p *PropertyType) GraphQLName() (name string, err error) {
+	if p.graphQLName == nil {
+		name, err = ToGraphQLIdentifier(p.Name, false)
+		if err != nil {
+			return name, err
+		}
+		p.graphQLName = &name
+	}
+	return *p.graphQLName, nil
+}
+
+func (p *PropertyType) GoName() (name string, err error) {
+	if p.goName == nil {
+		name, err = ToGraphQLIdentifier(p.Name, true)
+		if err != nil {
+			return name, err
+		}
+		p.goName = &name
+	}
+	return *p.goName, nil
+}
+
+// FieldGraphQLType maps fields to GraphQL scalar types when possible
+func (p *PropertyType) GraphQLType() (string, error) {
+	if p.graphQLType == nil {
+		result := "String"
+		switch p.Type {
+		case INT:
+			result = "Int64"
+		case DOUBLE:
+			result = "Float"
+		case STRING:
+			result = "String"
+		case STRUCT:
+			result = "[StructTuple!]"
+		case PROTO:
+			result = "ProtoTypeValue"
+		case BOOLEAN:
+			result = "Boolean"
+		}
+		p.graphQLType = &result
+	}
+	return *p.graphQLType, nil
+}
+
+// FieldGraphQLWrapper maps fields to GraphQL wrapper types
+func (p *PropertyType) GraphQLWrapper() (string, error) {
+	if p.graphQLWrapper == nil {
+		result := "StringValue"
+		switch p.Type {
+		case INT:
+			result = "IntValue"
+		case DOUBLE:
+			result = "DoubleValue"
+		case STRING:
+			result = "StringValue"
+		case STRUCT:
+			result = "StructValue"
+		case PROTO:
+			result = "ProtoValue"
+		case BOOLEAN:
+			result = "BoolValue"
+		}
+		p.graphQLWrapper = &result
+	}
+	return *p.graphQLWrapper, nil
 }

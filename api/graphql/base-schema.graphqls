@@ -1,85 +1,263 @@
-type Artifact {
-    id: ID
-    typeId: ID!
-    uri: String!
-    state: Int!
-    name: String!
-    externalId: String
-    createTimeSinceEpoch: Int!
-    lastUpdateTimeSinceEpoch: Int!
-    type(filter: InstanceFilter): ArtifactType!
-    properties : [ArtifactProperty!]
+scalar Int64
+
+"""
+State of an Artifact
+"""
+enum ArtifactState {
+    UNKNOWN
+    """
+    A state indicating that the artifact may exist.
+    """
+    PENDING
+    """
+    A state indicating that the artifact should exist, unless something
+    external to the system deletes it.
+    """
+    LIVE
+    """
+    A state indicating that the artifact should be deleted.
+    """
+    MARKED_FOR_DELETION
+    """
+    A state indicating that the artifact has been deleted.
+    """
+    DELETED
+    """
+    A state indicating that the artifact has been abandoned, which may be
+    due to a failed or cancelled execution.
+    """
+    ABANDONED
+    """
+    A state indicating that the artifact is a reference artifact. At
+    execution start time, the orchestrator produces an output artifact for
+    each output key with state PENDING. However, for an intermediate
+    artifact, this first artifact's state will be REFERENCE. Intermediate
+    artifacts emitted during a component's execution will copy the REFERENCE
+    artifact's attributes. At the end of an execution, the artifact state
+    should remain REFERENCE instead of being changed to LIVE.
+    """
+    REFERENCE
 }
 
-type ArtifactProperty {
-    artifactId: ID
+"""
+Generic Artifact Interface implemented by all Artifact instances
+"""
+interface ArtifactInterface {
+    id: ID!
+    typeId: ID!
+    uri: String
+    state: ArtifactState
     name: String
+    externalId: String
+    createTimeSinceEpoch: Int64!
+    lastUpdateTimeSinceEpoch: Int64!
+    type: ArtifactType!
+    properties: [InstanceProperty!]
+    attributions: [Attribution!]
+    events: [Event!]
+}
+
+"""
+Generic Artifact instance
+"""
+type Artifact implements ArtifactInterface {
+    id: ID!
+    typeId: ID!
+    uri: String
+    state: ArtifactState
+    name: String
+    externalId: String
+    createTimeSinceEpoch: Int64!
+    lastUpdateTimeSinceEpoch: Int64!
+    type: ArtifactType!
+    properties: [InstanceProperty!]
+    attributions: [Attribution!]
+    events: [Event!]
+}
+
+"""
+Instance property
+"""
+type InstanceProperty {
+    name: String!
     isCustomProperty: Boolean!
     propertyValue: Value!
 }
 
-type Context {
-    id: ID
+type Attribution {
+    id: ID!
+    contextId: ID!
+    artifactId: ID!
+    context: ContextInterface!
+    artifact: ArtifactInterface!
+}
+
+type Association {
+    id: ID!
+    contextId: ID!
+    executionId: ID!
+    context: ContextInterface!
+    execution: ExecutionInterface!
+}
+
+"""
+Generic Context interface implemented by all Context instances
+"""
+interface ContextInterface {
+    id: ID!
     typeId: ID!
     name: String!
     externalId: String
-    createTimeSinceEpoch: Int!
-    lastUpdateTimeSinceEpoch: Int!
+    createTimeSinceEpoch: Int64!
+    lastUpdateTimeSinceEpoch: Int64!
     type: ContextType!
-    parent: Context
-    children: [Context]
-    attributions: [Artifact!]
-    associations: [Execution!]
-    properties: [ContextProperty!]
+    properties: [InstanceProperty!]
+    parents: [ContextInterface!]
+    children: [ContextInterface!]
+    attributions: [Attribution!]
+    associations: [Association!]
 }
 
-type ContextProperty {
-    contextId: ID
+"""
+Generic Context instance
+"""
+type Context implements ContextInterface {
+    id: ID!
+    typeId: ID!
     name: String!
-    isCustomProperty: Int!
-    propertyValue: Value!
+    externalId: String
+    createTimeSinceEpoch: Int64!
+    lastUpdateTimeSinceEpoch: Int64!
+    type: ContextType!
+    properties: [InstanceProperty!]
+    parents: [ContextInterface!]
+    children: [ContextInterface!]
+    attributions: [Attribution!]
+    associations: [Association!]
 }
 
+"""
+Events distinguish between an artifact that is written by the execution
+(possibly as a cache), versus artifacts that are part of the declared
+output of the Execution. For more information on what DECLARED_ means,
+see the comment on the message.
+"""
+enum EventType {
+    UNKNOWN
+    """
+    A declared output of the execution.
+    """
+    DECLARED_OUTPUT
+    """
+    A declared input of the execution.
+    """
+    DECLARED_INPUT
+    """
+    An input of the execution.
+    """
+    INPUT
+    """
+    An output of the execution.
+    """
+    OUTPUT
+    """
+    An internal input of the execution.
+    """
+    INTERNAL_INPUT
+    """
+    An internal output of the execution.
+    """
+    INTERNAL_OUTPUT
+    """
+    A pending output of the execution.
+    """
+    PENDING_OUTPUT
+}
+
+union EventStep = EventStepIndex | EventStepKey
+
+type EventStepIndex {
+    index: Int!
+}
+
+type EventStepKey {
+    key: String!
+}
+
+"""
+Event instance
+"""
 type Event {
-    id: ID
+    id: ID!
     artifactId: ID!
     executionId: ID!
-    type: Int!
-    artifact: Artifact
-    execution: Execution
-    millisecondsSinceEpoch: Int!
+    type: EventType!
+    path: [EventStep!]!
+    millisecondsSinceEpoch: Int64!
+    artifact: ArtifactInterface
+    execution: ExecutionInterface
 }
 
-type EventPath {
-    eventId: ID!
-    isIndexStep: Int!
-    stepIndex: Int!
-    stepKey: String!
+"""
+The state of the Execution. The state transitions are
+NEW -> RUNNING -> COMPLETE | CACHED | FAILED | CANCELED
+CACHED means the execution is skipped due to cached results.
+CANCELED means the execution is skipped due to precondition not met. It is
+different from CACHED in that a CANCELED execution will not have any event
+associated with it. It is different from FAILED in that there is no
+unexpected error happened and it is regarded as a normal state.
+"""
+enum ExecutionState {
+    UNKNOWN
+    NEW
+    RUNNING
+    COMPLETE
+    FAILED
+    CACHED
+    CANCELED
 }
 
-type Execution {
-    id: ID
+"""
+Generic Execution interface implemented by all Execution instances
+"""
+interface ExecutionInterface {
+    id: ID!
     typeId: ID!
-    lastKnownState: Int!
-    name: String!
+    lastKnownState: ExecutionState
+    name: String
     externalId: String
-    createTimeSinceEpoch: Int!
-    lastUpdateTimeSinceEpoch: Int!
+    createTimeSinceEpoch: Int64!
+    lastUpdateTimeSinceEpoch: Int64!
     type: ExecutionType!
-    properties: [ExecutionProperty!]
+    properties: [InstanceProperty!]
+    associations: [Association!]
+    events: [Event!]
 }
 
-type ExecutionProperty {
-    executionId: ID
-    name: String!
-    isCustomProperty: Int!
-    propertyValue: Value!
+"""
+Generic Execution instance
+"""
+type Execution {
+    id: ID!
+    typeId: ID!
+    lastKnownState: ExecutionState
+    name: String
+    externalId: String
+    createTimeSinceEpoch: Int64!
+    lastUpdateTimeSinceEpoch: Int64!
+    type: ExecutionType!
+    properties: [InstanceProperty!]!
+    associations: [InstanceProperty!]
+    events: [InstanceProperty!]
 }
 
-union Value = IntValue | DoubleValue | StringValue | BoolValue
+"""
+Property values
+"""
+union Value = IntValue | DoubleValue | StringValue | BoolValue | StructValue | ProtoValue
 
 type IntValue {
-    value: Int!
+    value: Int64!
 }
 
 type DoubleValue {
@@ -94,82 +272,153 @@ type BoolValue {
     value: Boolean!
 }
 
+"""
+List values usable inside StructValue
+"""
+type ListValue {
+    value: [StructValueType!]
+}
+
+"""
+StructValueType is map entry type in StructValue
+"""
+union StructValueType = IntValue | DoubleValue | StringValue | BoolValue | StructValue | ListValue
+
+"""
+Entry in an StructValue map
+"""
+type StructTuple {
+    key: String!
+    value: StructValueType
+}
+
+"""
+StructValue is a key value map and supports list values
+"""
+type StructValue {
+    value: [StructTuple!]!
+}
+
+"""
+ByteArray scalar type mapped to base64 encoded string
+"""
+scalar ByteArray
+
+"""
+ProtoValue wraps a ProtoTypeValue tuple
+"""
+type ProtoValue {
+    value: ProtoTypeValue!
+}
+
+"""
+ProtoTypeValue is a byte array with an optional typeUrl describing the protobuf type
+"""
+type ProtoTypeValue {
+    typeUrl: String
+    value: ByteArray
+}
+
+"""
+DataType describes property value types
+"""
+enum DataType {
+    UNKNOWN
+    INT
+    DOUBLE
+    STRING
+    STRUCT
+    PROTO
+    BOOLEAN
+}
+
+"""
+TypeKind describes metadata Types
+"""
+enum TypeKind {
+    EXECUTION_TYPE
+    ARTIFACT_TYPE
+    CONTEXT_TYPE
+}
+
+"""
+Generic Type interface for all metadata types
+"""
 interface Type {
-    id: ID
+    id: ID!
     name: String!
-    version: String!
-    typeKind: Int!
-    description: String!
+    version: String
+    typeKind: TypeKind!
+    description: String
     externalId: String
     properties: [TypeProperty!]
 }
 
+"""
+Type property
+"""
 type TypeProperty {
-    typeId: ID!
     name: String!
-    dataType: Int!
+    dataType: DataType!
 }
 
-interface ArtifactTypeInterface implements Type {
-    id: ID
+"""
+Type property input
+"""
+input TypePropertyInput {
     name: String!
-    version: String!
-    typeKind: Int!
-    description: String!
+    dataType: DataType!
+}
+
+"""
+ArtifactType input
+"""
+input ArtifactTypeInput {
+    name: String!
+    version: String
+    typeKind: TypeKind!
+    description: String
+    externalId: String
+    properties: [TypePropertyInput!]
+}
+
+"""
+ArtifactType
+"""
+type ArtifactType implements Type {
+    id: ID!
+    name: String!
+    version: String
+    typeKind: TypeKind!
+    description: String
     externalId: String
     properties: [TypeProperty!]
 }
 
-type ArtifactType implements ArtifactTypeInterface & Type {
-    id: ID
+"""
+ContextType
+"""
+type ContextType implements Type {
+    id: ID!
     name: String!
-    version: String!
-    typeKind: Int!
-    description: String!
+    version: String
+    typeKind: TypeKind!
+    description: String
     externalId: String
     properties: [TypeProperty!]
 }
 
-interface ContextTypeInterface implements Type {
-    id: ID
+"""
+ExecutionType
+"""
+type ExecutionType implements Type {
+    id: ID!
     name: String!
-    version: String!
-    typeKind: Int!
-    description: String!
+    version: String
+    typeKind: TypeKind!
+    description: String
     externalId: String
-    properties: [TypeProperty!]
-}
-
-type ContextType implements ContextTypeInterface & Type {
-    id: ID
-    name: String!
-    version: String!
-    typeKind: Int!
-    description: String!
-    externalId: String
-    properties: [TypeProperty!]
-}
-
-interface ExecutionTypeInterface implements Type {
-    id: ID
-    name: String!
-    version: String!
-    typeKind: Int!
-    description: String!
-    externalId: String
-    inputType: String!
-    outputType: String!
-    properties: [TypeProperty!]
-}
-
-type ExecutionType implements ExecutionTypeInterface & Type {
-    id: ID
-    name: String!
-    version: String!
-    typeKind: Int!
-    description: String!
-    externalId: String
-    inputType: String!
-    outputType: String!
+    inputType: String
+    outputType: String
     properties: [TypeProperty!]
 }

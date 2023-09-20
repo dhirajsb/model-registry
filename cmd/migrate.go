@@ -55,19 +55,19 @@ to the latest schema required by this server.`,
 func migrateDatabase(dbConn *gorm.DB) error {
 	// TODO add support for more elaborate Gorm migrations
 	err := dbConn.AutoMigrate(
+		db.Type{},
+		db.TypeProperty{},
 		db.Artifact{},
 		db.ArtifactProperty{},
-		db.Association{},
-		db.Attribution{},
 		db.Context{},
 		db.ContextProperty{},
+		db.Association{},
+		db.Attribution{},
+		db.ParentContext{},
 		db.Event{},
 		db.EventPath{},
 		db.Execution{},
 		db.ExecutionProperty{},
-		db.ParentContext{},
-		db.Type{},
-		db.TypeProperty{},
 	)
 	if err != nil {
 		return fmt.Errorf("db migration failed: %w", err)
@@ -89,7 +89,7 @@ func loadLibraries(dbConn *gorm.DB) error {
 				Version:     at.Version,
 				Description: at.Description,
 				ExternalId:  at.ExternalId,
-				Properties:  ToProtoProperties(at.Properties),
+				Properties:  toProtoProperties(at.Properties),
 			})
 		}
 		for _, ct := range lib.ContextTypes {
@@ -98,7 +98,7 @@ func loadLibraries(dbConn *gorm.DB) error {
 				Version:     ct.Version,
 				Description: ct.Description,
 				ExternalId:  ct.ExternalId,
-				Properties:  ToProtoProperties(ct.Properties),
+				Properties:  toProtoProperties(ct.Properties),
 			})
 		}
 		for _, et := range lib.ExecutionTypes {
@@ -107,23 +107,23 @@ func loadLibraries(dbConn *gorm.DB) error {
 				Version:     et.Version,
 				Description: et.Description,
 				ExternalId:  et.ExternalId,
-				Properties:  ToProtoProperties(et.Properties),
+				Properties:  toProtoProperties(et.Properties),
 			})
 		}
 		response, err := grpcServer.PutTypes(context.Background(), &typesRequest)
 		if err != nil {
 			return fmt.Errorf("failed to add library from file %s: %w", path, err)
 		}
-		glog.Infof("created/updated %d ArtifactTypes, %d ContextTypes and %d ExecutionTypes from library file %s",
+		glog.Infof("created/updated %d artifacts, %d contexts and %d execution types from library file %s",
 			len(response.ArtifactTypeIds), len(response.ContextTypeIds), len(response.ExecutionTypeIds), path)
 	}
 	return nil
 }
 
-func ToProtoProperties(props map[string]library.PropertyType) map[string]proto.PropertyType {
+func toProtoProperties(props []library.PropertyType) map[string]proto.PropertyType {
 	result := make(map[string]proto.PropertyType)
-	for name, prop := range props {
-		result[name] = proto.PropertyType(prop)
+	for _, prop := range props {
+		result[prop.Name] = proto.PropertyType(prop.Type)
 	}
 	return result
 }

@@ -74,6 +74,55 @@ autobind:
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
+  Artifact:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  Association:
+    fields:
+      context:
+        resolver: true
+      execution:
+        resolver: true
+  Attribution:
+    fields:
+      context:
+        resolver: true
+      artifact:
+        resolver: true
+  ByteArray:
+    model:
+      - github.com/opendatahub-io/model-registry/internal/model/graph.ByteArray
+  Context:
+    fields:
+      type:
+        resolver: true
+      parents:
+        resolver: true
+      children:
+        resolver: true
+      attributions:
+        resolver: true
+      associations:
+        resolver: true
+  Event:
+    fields:
+      artifact:
+        resolver: true
+      execution:
+        resolver: true
+  Execution:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID
@@ -85,7 +134,274 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
-  Artifact:
+  Int64:
+    model:
+      - github.com/opendatahub-io/model-registry/internal/model/graph.Int64
+  MlmdDataset:
     fields:
       type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlmdDeploy:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+  MlmdEvaluate:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+  MlmdMetrics:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlmdModel:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlmdProcess:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+  MlmdStatistics:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlmdTrain:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+  MlmdTransform:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaAlgorithm:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaData:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaDataCharacteristic:
+    fields:
+      type:
+        resolver: true
+      parents:
+        resolver: true
+      children:
+        resolver: true
+      attributions:
+        resolver: true
+      associations:
+        resolver: true
+  MlschemaDataSet:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaDatasetCharacteristic:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaEvaluationMeasure:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaEvaluationProcedure:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaEvaluationSpecification:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaExperiment:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaFeature:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaFeatureCharacteristic:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaHyperParameter:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaHyperParameterSetting:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaImplementation:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaImplementationCharacteristic:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaModel:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaModelEvaluation:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaModelVersion:
+    fields:
+      type:
+        resolver: true
+      parents:
+        resolver: true
+      children:
+        resolver: true
+      attributions:
+        resolver: true
+      associations:
+        resolver: true
+  MlschemaRegisteredModel:
+    fields:
+      type:
+        resolver: true
+      parents:
+        resolver: true
+      children:
+        resolver: true
+      attributions:
+        resolver: true
+      associations:
+        resolver: true
+  MlschemaRun:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaSoftware:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaStudy:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+  MlschemaTask:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
         resolver: true
