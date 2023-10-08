@@ -10,6 +10,9 @@ model-registry: build
 # graphql mapper tool
 include tools/gqlmapper/gqlmapper.mk
 
+# rest mapper tool
+include tools/restmapper/restmapper.mk
+
 internal/ml_metadata/proto/%.pb.go: api/grpc/ml_metadata/proto/%.proto
 	protoc -I./api/grpc --go_out=./internal --go_opt=paths=source_relative \
 		--go-grpc_out=./internal --go-grpc_opt=paths=source_relative $<
@@ -54,6 +57,25 @@ bin/golangci-lint:
 
 bin/goverter:
 	GOBIN=$(PROJECT_PATH)/bin go install github.com/jmattheis/goverter/cmd/goverter@v0.18.0
+
+# TODO Change to follow other tool patterns
+OPENAPI_GENERATOR ?= ${PROJECT_BIN}/openapi-generator
+NPM ?= "$(shell which npm)"
+openapi-generator:
+ifeq (, $(shell which ${NPM} 2> /dev/null))
+	@echo "npm is not available please install it to be able to install openapi-generator"
+	exit 1
+endif
+ifeq (, $(shell which ${PROJECT_BIN}/openapi-generator 2> /dev/null))
+	@{ \
+	set -e ;\
+	mkdir -p ${PROJECT_BIN} ;\
+	mkdir -p ${PROJECT_BIN}/openapi-generator-installation ;\
+	cd ${PROJECT_BIN} ;\
+	${NPM} install --prefix ${PROJECT_BIN}/openapi-generator-installation @openapitools/openapi-generator-cli@cli-4.3.1 ;\
+	ln -s openapi-generator-installation/node_modules/.bin/openapi-generator openapi-generator ;\
+	}
+endif
 
 .PHONY: deps
 deps: bin/go-enum bin/protoc-gen-go bin/protoc-gen-go-grpc bin/gqlgen bin/golangci-lint bin/goverter

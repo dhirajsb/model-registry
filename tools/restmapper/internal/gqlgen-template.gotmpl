@@ -1,0 +1,31 @@
+{{- define "artifact-resolvers"}}{{- $GqlName:=.GraphQLName}}  {{$GqlName}}:
+    fields:
+      type:
+        resolver: true
+      attributions:
+        resolver: true
+      events:
+        resolver: true
+{{end}}
+{{- define "context-resolvers"}}{{- $GqlName:=.GraphQLName}}  {{$GqlName}}:
+    fields:
+      type:
+        resolver: true
+      parents:
+        resolver: true
+      children:
+        resolver: true
+      attributions:
+        resolver: true
+      associations:
+        resolver: true
+{{end}}
+{{- define "execution-resolvers"}}{{- $GqlName:=.GraphQLName}}  {{$GqlName}}:
+    fields:
+      type:
+        resolver: true
+      associations:
+        resolver: true
+      events:
+        resolver: true
+{{end}}

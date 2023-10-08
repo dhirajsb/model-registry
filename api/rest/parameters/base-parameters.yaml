@@ -1,0 +1,7 @@
+resourceId:
+  name: id
+  in: path
+  required: true
+  description: The id of the metadata resource to retrieve
+  schema:
+    type: string

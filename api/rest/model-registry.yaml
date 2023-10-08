@@ -1,0 +1,27 @@
+openapi: 3.0.3
+info:
+  title: Model Registry REST API
+  description: REST API for Model Registry to create and manage ML model metadata
+  version: 1.0.0
+tags:
+  - name: ModelRegistryService
+    description: "Model Registry Service REST API"
+servers:
+  - url: 'https://localhost:8080'
+paths:
+  '/test':
+    post:
+      requestBody:
+        $ref: ''
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/base-schema.yaml#/ml_metadataArtifact'
+          description: A list of connector
+components:
+  schemas:
+    $ref: "./schemas/base-schema.yaml"
+  parameters:
+    $ref: "./parameters/base-parameters.yaml"

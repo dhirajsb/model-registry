@@ -1,0 +1,385 @@
+##############
+# common types
+##############
+List:
+  required:
+    - pageSize
+    - nextPageToken
+  type: object
+  properties:
+    pageSize:
+      type: integer
+      format: int32
+    nextPageToken:
+      type: string
+
+######################
+# artifact base types
+######################
+ml_metadataArtifact:
+  allOf:
+    - $ref: "#/ml_metadataArtifactCreate"
+    - type: object
+      properties:
+        id:
+          type: string
+          format: int64
+          description: Output only. The unique server generated id of the artifact.
+          readOnly: true
+        create_time_since_epoch:
+          type: string
+          format: int64
+          description: Output only. Create time of the artifact in millisecond since epoch.
+          readOnly: true
+        last_update_time_since_epoch:
+          type: string
+          format: int64
+          description: |-
+            Output only. Last update time of the artifact since epoch in millisecond
+            since epoch.
+          readOnly: true
+
+ml_metadataArtifactCreate:
+  allOf:
+    - $ref: "#/ml_metadataArtifactUpdate"
+    - type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            The client provided name of the artifact. This field is optional. If set,
+            it must be unique among all the artifacts of the same artifact type within
+            a database instance and cannot be changed once set.
+
+ml_metadataArtifactUpdate:
+  type: object
+  properties:
+    uri:
+      type: string
+      description: |-
+        The uniform resource identifier of the physical artifact.
+        May be empty if there is no physical artifact.
+    external_id:
+      type: string
+      description: |-
+        The external id that come from the clients’ system. This field is optional.
+        If set, it must be unique among all artifacts within a database instance.
+    custom_properties:
+      type: object
+      additionalProperties:
+        $ref: '#/ml_metadataValue'
+      description: User provided custom properties which are not defined by its type.
+    state:
+      $ref: '#/ml_metadataArtifactState'
+      description: The state of the artifact known to the system.
+
+# artifact state enum
+ml_metadataArtifactState:
+  type: string
+  enum:
+    - UNKNOWN
+    - PENDING
+    - LIVE
+    - MARKED_FOR_DELETION
+    - DELETED
+    - ABANDONED
+    - REFERENCE
+  default: UNKNOWN
+  description: |2-
+     - PENDING: A state indicating that the artifact may exist.
+     - LIVE: A state indicating that the artifact should exist, unless something
+    external to the system deletes it.
+     - MARKED_FOR_DELETION: A state indicating that the artifact should be deleted.
+     - DELETED: A state indicating that the artifact has been deleted.
+     - ABANDONED: A state indicating that the artifact has been abandoned, which may be
+    due to a failed or cancelled execution.
+     - REFERENCE: A state indicating that the artifact is a reference artifact. At
+    execution start time, the orchestrator produces an output artifact for
+    each output key with state PENDING. However, for an intermediate
+    artifact, this first artifact's state will be REFERENCE. Intermediate
+    artifacts emitted during a component's execution will copy the REFERENCE
+    artifact's attributes. At the end of an execution, the artifact state
+    should remain REFERENCE instead of being changed to LIVE.
+
+####################
+# context base types
+####################
+ml_metadataContext:
+  allOf:
+    - $ref: "#/ml_metadataContextCreate"
+    - type: object
+      properties:
+        id:
+          type: string
+          format: int64
+          description: Output Only. The unique server generated id of the context.
+          readOnly: true
+        create_time_since_epoch:
+          type: string
+          format: int64
+          description: Output only. Create time of the context in millisecond since epoch.
+          readOnly: true
+        last_update_time_since_epoch:
+          type: string
+          format: int64
+          description: Output only. Last update time of the context in millisecond since epoch.
+          readOnly: true
+
+ml_metadataContextCreate:
+  allOf:
+    - $ref: "#/ml_metadataContextUpdate"
+    - type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            The client provided name of the context. It must be unique within a
+            database instance.
+
+ml_metadataContextUpdate:
+  type: object
+  properties:
+    external_id:
+      type: string
+      description: |-
+        The external id that come from the clients’ system. This field is optional.
+        If set, it must be unique among all contexts within a virtual database.
+    # TODO handle properties in restmapper
+    properties:
+      type: object
+      additionalProperties:
+        $ref: '#/ml_metadataValue'
+      description: Values of the properties, which must be specified in the ContextType.
+    custom_properties:
+      type: object
+      additionalProperties:
+        $ref: '#/ml_metadataValue'
+      description: User provided custom properties which are not defined by its type.
+
+######################
+# execution base types
+######################
+ml_metadataExecution:
+  allOf:
+    - $ref: "#/ml_metadataExecutionCreate"
+    - type: object
+      properties:
+        id:
+          type: string
+          format: int64
+          description: Output only. The unique server generated id of the execution.
+          readOnly: true
+        create_time_since_epoch:
+          type: string
+          format: int64
+          description: Output only. Create time of the execution in millisecond since epoch.
+          readOnly: true
+        last_update_time_since_epoch:
+          type: string
+          format: int64
+          description: Output only. Last update time of the execution in millisecond since epoch.
+          readOnly: true
+
+ml_metadataExecutionState:
+  type: string
+  enum:
+    - UNKNOWN
+    - NEW
+    - RUNNING
+    - COMPLETE
+    - FAILED
+    - CACHED
+    - CANCELED
+  default: UNKNOWN
+  description: |-
+    The state of the Execution. The state transitions are
+      NEW -> RUNNING -> COMPLETE | CACHED | FAILED | CANCELED
+    CACHED means the execution is skipped due to cached results.
+    CANCELED means the execution is skipped due to precondition not met. It is
+    different from CACHED in that a CANCELED execution will not have any event
+    associated with it. It is different from FAILED in that there is no
+    unexpected error happened and it is regarded as a normal state.
+
+ml_metadataExecutionCreate:
+  allOf:
+    - $ref: "#/ml_metadataExecutionUpdate"
+    - type: object
+      properties:
+        name:
+          type: string
+          description: |-
+            The client provided name of the execution. This field is optional. If set,
+            it must be unique among all the executions of the same execution type
+            within a database instance and cannot be changed once set.
+
+ml_metadataExecutionUpdate:
+  type: object
+  properties:
+    external_id:
+      type: string
+      description: |-
+        The external id that come from the clients’ system. This field is optional.
+        If set, it must be unique among all executions within a database instance.
+    last_known_state:
+      $ref: '#/ml_metadataExecutionState'
+      description: The last known state of an execution in the system.
+    custom_properties:
+      type: object
+      additionalProperties:
+        $ref: '#/ml_metadataValue'
+      description: User provided custom properties which are not defined by its type.
+
+#####################
+# property value type
+#####################
+ml_metadataValue:
+  type: object
+  properties:
+    int_value:
+      type: string
+      format: int64
+    double_value:
+      type: number
+      format: double
+    string_value:
+      type: string
+    struct_value:
+      type: object
+    proto_value:
+      $ref: '#/protobufAny'
+    bool_value:
+      type: boolean
+  description: A value in properties.
+protobufAny:
+  type: object
+  properties:
+    '@type':
+      type: string
+      description: |-
+        A URL/resource name that uniquely identifies the type of the serialized
+        protocol buffer message. This string must contain at least
+        one "/" character. The last segment of the URL's path must represent
+        the fully qualified name of the type (as in
+        `path/google.protobuf.Duration`). The name should be in a canonical form
+        (e.g., leading "." is not accepted).
+
+        In practice, teams usually precompile into the binary all types that they
+        expect it to use in the context of Any. However, for URLs which use the
+        scheme `http`, `https`, or no scheme, one can optionally set up a type
+        server that maps type URLs to message definitions as follows:
+
+        * If no scheme is provided, `https` is assumed.
+        * An HTTP GET on the URL must yield a [google.protobuf.Type][]
+          value in binary format, or produce an error.
+        * Applications are allowed to cache lookup results based on the
+          URL, or have them precompiled into a binary to avoid any
+          lookup. Therefore, binary compatibility needs to be preserved
+          on changes to types. (Use versioned type names to manage
+          breaking changes.)
+
+        Note: this functionality is not currently available in the official
+        protobuf release, and it is not used for type URLs beginning with
+        type.googleapis.com. As of May 2023, there are no widely used type server
+        implementations and no plans to implement one.
+
+        Schemes other than `http`, `https` (or the empty scheme) might be
+        used with implementation specific semantics.
+  additionalProperties: {}
+  description: |-
+    `Any` contains an arbitrary serialized protocol buffer message along with a
+    URL that describes the type of the serialized message.
+
+    Protobuf library provides support to pack/unpack Any values in the form
+    of utility functions or additional generated methods of the Any type.
+
+    Example 1: Pack and unpack a message in C++.
+
+        Foo foo = ...;
+        Any any;
+        any.PackFrom(foo);
+        ...
+        if (any.UnpackTo(&foo)) {
+          ...
+        }
+
+    Example 2: Pack and unpack a message in Java.
+
+        Foo foo = ...;
+        Any any = Any.pack(foo);
+        ...
+        if (any.is(Foo.class)) {
+          foo = any.unpack(Foo.class);
+        }
+        // or ...
+        if (any.isSameTypeAs(Foo.getDefaultInstance())) {
+          foo = any.unpack(Foo.getDefaultInstance());
+        }
+
+     Example 3: Pack and unpack a message in Python.
+
+        foo = Foo(...)
+        any = Any()
+        any.Pack(foo)
+        ...
+        if any.Is(Foo.DESCRIPTOR):
+          any.Unpack(foo)
+          ...
+
+     Example 4: Pack and unpack a message in Go
+
+         foo := &pb.Foo{...}
+         any, err := anypb.New(foo)
+         if err != nil {
+           ...
+         }
+         ...
+         foo := &pb.Foo{}
+         if err := any.UnmarshalTo(foo); err != nil {
+           ...
+         }
+
+    The pack methods provided by protobuf library will by default use
+    'type.googleapis.com/full.type.name' as the type URL and the unpack
+    methods only use the fully qualified type name after the last '/'
+    in the type URL, for example "foo.bar.com/x/y.z" will yield type
+    name "y.z".
+
+    JSON
+    ====
+    The JSON representation of an `Any` value uses the regular
+    representation of the deserialized, embedded message, with an
+    additional field `@type` which contains the type URL. Example:
+
+        package google.profile;
+        message Person {
+          string first_name = 1;
+          string last_name = 2;
+        }
+
+        {
+          "@type": "type.googleapis.com/google.profile.Person",
+          "firstName": <string>,
+          "lastName": <string>
+        }
+
+    If the embedded message type is well-known and has a custom JSON
+    representation, that representation will be embedded adding a field
+    `value` which holds the custom JSON in addition to the `@type`
+    field. Example (for message [google.protobuf.Duration][]):
+
+        {
+          "@type": "type.googleapis.com/google.protobuf.Duration",
+          "value": "1.212s"
+        }
+protobufNullValue:
+  type: string
+  enum:
+    - NULL_VALUE
+  default: NULL_VALUE
+  description: |-
+    `NullValue` is a singleton enumeration to represent the null value for the
+    `Value` type union.
+
+    The JSON representation for `NullValue` is JSON `null`.
+
+     - NULL_VALUE: Null value.

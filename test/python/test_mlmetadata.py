@@ -1,8 +1,10 @@
+import base64
+
 import grpc
 import ml_metadata as mlmd
 import ml_metadata.metadata_store.pywrap.metadata_store_extension.metadata_store
 from grpc import insecure_channel
-# from ml_metadata.metadata_store import metadata_store
+from ml_metadata.metadata_store import metadata_store
 from ml_metadata.proto import metadata_store_pb2
 from ml_metadata.proto import metadata_store_service_pb2
 from ml_metadata.proto import metadata_store_service_pb2_grpc
@@ -13,7 +15,7 @@ def main():
     # connection_config.sqlite.connection_mode = 3 # READWRITE_OPENCREATE
     # store = metadata_store.MetadataStore(connection_config)
 
-    # connection_config = metadata_store_pb2.ConnectionConfig()
+    connection_config = metadata_store_pb2.ConnectionConfig()
     # connection_config.mysql.host = 'localhost'
     # connection_config.mysql.port = 3306
     # connection_config.mysql.database = 'mlmetadata'
@@ -78,6 +80,21 @@ def main():
     request.artifacts.extend([data_artifact])
     response = store.PutArtifacts(request)
     data_artifact_id = response.artifact_ids[0]
+
+    request = metadata_store_service_pb2.GetArtifactsRequest(options=metadata_store_pb2.ListOperationOptions(max_result_size=1, order_by_field=metadata_store_pb2.ListOperationOptions.OrderByField(field=metadata_store_pb2.ListOperationOptions.OrderByField.Field.ID, is_asc=True)))
+    # artifacts_with_conditions = store.GetArtifacts(
+    #       list_options=mlmd.ListOptions(
+    #           limit=1, order_by=mlmd.OrderByField.ID, is_asc=True))
+    artifacts_with_conditions = store.GetArtifacts(request)
+    print(artifacts_with_conditions.artifacts)
+    print(artifacts_with_conditions.next_page_token)
+    # print(type(artifacts_with_conditions.next_page_token))
+    token = metadata_store_pb2.ListOperationNextPageToken()
+    token.ParseFromString(base64.b64decode(artifacts_with_conditions.next_page_token + "===="))
+    print(token.id_offset)
+    print(token.field_offset)
+    print(token.set_options)
+    print(token.listed_ids)
 
     # # Query all registered Artifacts
     # artifacts = store.GetArtifacts()
